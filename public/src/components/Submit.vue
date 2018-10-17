@@ -18,7 +18,7 @@
         <label for="directions">Enter directions</label>
         <input id="directions" v-model="directions">
       </div>
-      <button @click="recipeData">Submit</button>
+      <button type="button" @click="recipeData">Submit</button>
     </form>
   </div>
 </template>
