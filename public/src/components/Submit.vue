@@ -37,7 +37,7 @@ export default {
   },
   methods: {
     ...mapMutations(['submitRecipe']),
-    recipeData(e) {
+    recipeData() {
       const recipe = {
         name: this.name,
         description: this.description,
