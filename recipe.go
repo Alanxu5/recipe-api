@@ -1,14 +1,13 @@
 package main
 
 import (
-	"api/handlers"
 	"database/sql"
 	"fmt"
-	"net/http"
 	"os"
+	"recipe/api/handlers"
 
 	"github.com/labstack/echo"
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // loading the driver anonymously, using _ so none of its exported names are visible
 )
 
 var db *sql.DB
@@ -23,29 +22,32 @@ const (
 
 func main() {
 	initDb()
-	defer db.Close()
-	e := echo.New()
-	e.POST("/recipies", handlers.PostRecipe(db))
-	http.HandleFunc("/", hello)
-	http.ListenAndServe(":8000", nil)
-}
 
-func hello(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("hello!"))
+	// idiomatic to use if the db should not have a lifetime beyond the scope of the function.
+	defer db.Close()
+
+	e := echo.New()
+	e.GET("/recipes", handlers.CreateRecipe(db))
+	e.Logger.Fatal(e.Start(":8000"))
 }
 
 func initDb() {
 	config := dbConfig()
 	var err error
+
+	// all the information needed to connect to DB
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		config[dbhost], config[dbport],
 		config[dbuser], config[dbpass], config[dbname])
 
+	// sql.Open() does not establish any connection to the DB
 	db, err = sql.Open("postgres", psqlInfo)
 	if err != nil {
 		panic(err)
 	}
+
+	// db.Ping() checks if the DB is available and accessible
 	err = db.Ping()
 	if err != nil {
 		panic(err)
