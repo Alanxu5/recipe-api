@@ -22,12 +22,16 @@ const (
 
 func main() {
 	initDb()
+	migrate(db)
 
 	// idiomatic to use if the db should not have a lifetime beyond the scope of the function.
 	defer db.Close()
 
 	e := echo.New()
-	e.GET("/recipes", handlers.CreateRecipe(db))
+	e.GET("/recipes", handlers.GetRecipe(db))
+	e.POST("/recipes", handlers.CreateRecipe(db))
+	// e.DELETE("/recipes/:id", handlers.DeleteRecipe(db))
+
 	e.Logger.Fatal(e.Start(":8000"))
 }
 
@@ -83,4 +87,19 @@ func dbConfig() map[string]string {
 	conf[dbpass] = password
 	conf[dbname] = name
 	return conf
+}
+
+func migrate(db *sql.DB) {
+	sql := `
+	CREATE TABLE IF NOT EXISTS recipes (
+			id SERIAL,
+			name TEXT NOT NULL
+	);
+	`
+
+	_, err := db.Exec(sql)
+	// Exit if something goes wrong with our SQL statement above
+	if err != nil {
+		panic(err)
+	}
 }
