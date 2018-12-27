@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <Submit/>
+    <Submit />
   </div>
 </template>
 
@@ -8,7 +8,7 @@
 import Submit from './components/Submit.vue'
 
 export default {
-  name: 'app',
+  name: 'App',
   components: {
     Submit
   }

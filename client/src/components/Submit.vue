@@ -3,22 +3,47 @@
     <h1>Submit your Recipe!</h1>
     <form>
       <div>
-        <label for="name">Enter recipe name</label>
-        <input id="name" v-model="name">
+        <label for="name">
+          Enter recipe name
+        </label>
+        <input
+          id="name"
+          v-model="name"
+        >
       </div>
       <div>
-        <label for="description">Enter description</label>
-        <input id="description" v-model="description">
+        <label for="description">
+          Enter description
+        </label>
+        <input
+          id="description"
+          v-model="description"
+        >
       </div>
       <div>
-        <label for="ingredients">Enter ingredients</label>
-        <input id="ingredients" v-model="ingredients">
+        <label for="ingredients">
+          Enter ingredients
+        </label>
+        <input
+          id="ingredients"
+          v-model="ingredients"
+        >
       </div>
       <div>
-        <label for="directions">Enter directions</label>
-        <input id="directions" v-model="directions">
+        <label for="directions">
+          Enter directions
+        </label>
+        <input
+          id="directions"
+          v-model="directions"
+        >
       </div>
-      <button type="button" @click="recipeData">Submit</button>
+      <button
+        type="button"
+        @click="recipeData"
+      >
+        Submit
+      </button>
     </form>
   </div>
 </template>
