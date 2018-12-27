@@ -93,7 +93,11 @@ func migrate(db *sql.DB) {
 	sql := `
 	CREATE TABLE IF NOT EXISTS recipes (
 			id SERIAL,
-			name TEXT NOT NULL
+			name TEXT NOT NULL,
+			description TEXT NOT NULL,
+			prep_time SMALLINT NOT NULL,
+			cook_time SMALLINT NOT NULL,
+			feeds SMALLINT NOT NULL
 	);
 	`
 
