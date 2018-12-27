@@ -49,3 +49,14 @@ func CreateRecipe(db *sql.DB, name string) (int64, error) {
 
 	return lastInsertId, nil
 }
+
+func DeleteRecipe(db *sql.DB, id int) (int64, error) {
+	var deletedId int64
+	err := db.QueryRow("DELETE FROM recipes WHERE id = $1 RETURNING id", id).Scan(&deletedId)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return deletedId, nil
+}

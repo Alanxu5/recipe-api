@@ -30,7 +30,7 @@ func main() {
 	e := echo.New()
 	e.GET("/recipes", handlers.GetRecipe(db))
 	e.POST("/recipes", handlers.CreateRecipe(db))
-	// e.DELETE("/recipes/:id", handlers.DeleteRecipe(db))
+	e.DELETE("/recipes/:id", handlers.DeleteRecipe(db))
 
 	e.Logger.Fatal(e.Start(":8000"))
 }

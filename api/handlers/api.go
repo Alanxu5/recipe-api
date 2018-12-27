@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 	"recipe/api/models"
+	"strconv"
 
 	"github.com/labstack/echo"
 )
@@ -38,20 +39,20 @@ func CreateRecipe(db *sql.DB) echo.HandlerFunc {
 	}
 }
 
-// func DeleteRecipe(db *sql.DB) echo.HandlerFunc {
-// 	return func(c echo.Context) error {
-// 		id, _ := strconv.Atoi(c.Param("id"))
+func DeleteRecipe(db *sql.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		id, _ := strconv.Atoi(c.Param("id"))
 
-// 		// delete a recipe using our model
-// 		_, err := models.DeleteRecipe(db, id)
+		// delete a recipe using our model
+		deletedId, err := models.DeleteRecipe(db, id)
 
-// 		// if deletion is sucessful return a response
-// 		if err == nil {
-// 			return c.JSON(http.StatusOK, H{
-// 				"deleted": id,
-// 			})
-// 		} else {
-// 			return err
-// 		}
-// 	}
-// }
+		// if deletion is sucessful return a response
+		if err == nil {
+			return c.JSON(http.StatusOK, H{
+				"deleted": deletedId,
+			})
+		} else {
+			return err
+		}
+	}
+}
