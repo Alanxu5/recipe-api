@@ -5,8 +5,14 @@ import (
 )
 
 type Recipe struct {
-	ID   int    `json:id`
-	Name string `json:name`
+	ID          int    `json:id`
+	Name        string `json:name`
+	Description string `json:description`
+	Ingredients string `json:ingredients`
+	Directions  string `json:directions`
+	PrepTime    int    `json:prep_time`
+	CookTime    int    `json:cook_time`
+	Feeds       int    `json:feeds`
 }
 
 type RecipeCollection struct {
@@ -39,9 +45,9 @@ func GetRecipes(db *sql.DB) RecipeCollection {
 	return result
 }
 
-func CreateRecipe(db *sql.DB, name string) (int64, error) {
+func CreateRecipe(db *sql.DB, recipe Recipe) (int64, error) {
 	var lastInsertId int64
-	err := db.QueryRow("INSERT INTO recipes (name) VALUES ($1) RETURNING id", name).Scan(&lastInsertId)
+	err := db.QueryRow("INSERT INTO recipes (name, description, prep_time, cook_time, feeds) VALUES ($1, $2, $3, $4, $5) RETURNING id", recipe.Name, recipe.Description, recipe.PrepTime, recipe.CookTime, recipe.Feeds).Scan(&lastInsertId)
 
 	if err != nil {
 		panic(err)

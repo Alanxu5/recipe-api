@@ -26,7 +26,7 @@ func CreateRecipe(db *sql.DB) echo.HandlerFunc {
 		c.Bind(&recipe)
 
 		// add a recipe using our model
-		id, err := models.CreateRecipe(db, recipe.Name)
+		id, err := models.CreateRecipe(db, recipe)
 
 		// if creation is successful return a response
 		if err == nil {

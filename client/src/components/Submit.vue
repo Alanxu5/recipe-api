@@ -71,7 +71,7 @@
           </div>
           <button
             type="button"
-            @click="recipeData"
+            @click="submitRecipe"
           >
             Submit
           </button>
@@ -97,8 +97,7 @@ export default {
     }
   },
   methods: {
-    ...mapMutations(['submitRecipe']),
-    recipeData() {
+    submitRecipe() {
       const recipe = {
         name: this.name,
         description: this.description,
@@ -109,7 +108,7 @@ export default {
         feeds: this.feeds,
       };
 
-      this.submitRecipe(recipe);
+      this.$store.dispatch('SUBMIT_NEW_RECIPE', recipe)
     }
   },
 }

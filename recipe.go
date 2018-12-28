@@ -7,6 +7,7 @@ import (
 	"recipe/api/handlers"
 
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	_ "github.com/lib/pq" // loading the driver anonymously, using _ so none of its exported names are visible
 )
 
@@ -28,6 +29,12 @@ func main() {
 	defer db.Close()
 
 	e := echo.New()
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
+
+	// TODO: need to restrict
+	e.Use(middleware.CORS())
+
 	e.GET("/recipes", handlers.GetRecipe(db))
 	e.POST("/recipes", handlers.CreateRecipe(db))
 	e.DELETE("/recipes/:id", handlers.DeleteRecipe(db))
