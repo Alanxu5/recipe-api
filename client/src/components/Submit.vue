@@ -1,111 +1,77 @@
 <template>
   <div>
-    <h1>Submit your Recipe!</h1>
-    <form>
+    <div class="submit-modal">
       <div class="container">
-        <div class="left-side">
-          <div>
-            <label for="prepTime">
-              Enter prep time
-            </label>
-            <input
-              id="prepTime"
-              v-model="prepTime"
-            >
+        <div class="top-container">
+          <div class="image-upload" />
+          <div class="short-input">
+            <Input 
+              v-model="recipeModel.name"
+              label-name="Name" />
+            <Input 
+              v-model="recipeModel.prepTime"
+              label-name="Prep Time" />
+            <Input 
+              v-model="recipeModel.cookTime"
+              label-name="Cook Time" />
+            <Input 
+              v-model="recipeModel.feeds"
+              label-name="Servings" />                             
           </div>
-          <div>
-            <label for="cookTime">
-              Enter cook time
-            </label>
-            <input
-              id="cookTime"
-              v-model="cookTime"
-            >
-          </div>         
-          <div>
-            <label for="feeds">
-              Enter number of people recipe feeds
-            </label>
-            <input
-              id="feeds"
-              v-model="feeds"
-            >
-          </div>                   
         </div>
-        <div class="right-side">
-          <div>
-            <label for="name">
-              Enter recipe name
-            </label>
-            <input
-              id="name"
-              v-model="name"
-            >
-          </div>
-          <div>
-            <label for="description">
-              Enter description
-            </label>
-            <input
-              id="description"
-              v-model="description"
-            >
-          </div>
-          <div>
-            <label for="ingredients">
-              Enter ingredients
-            </label>
-            <input
-              id="ingredients"
-              v-model="ingredients"
-            >
-          </div>
-          <div>
-            <label for="directions">
-              Enter directions
-            </label>
-            <input
-              id="directions"
-              v-model="directions"
-            >
-          </div>
+        <div class="bottom-container">
+          <Input 
+            v-model="recipeModel.description"
+            label-name="Description" />
+          <Input 
+            v-model="recipeModel.ingredients"
+            label-name="Ingredients" />
+          <Input 
+            v-model="recipeModel.directions"
+            label-name="Directions" />                  
           <button
             type="button"
-            @click="submitRecipe"
-          >
+            @click="submitRecipe">
             Submit
-          </button>
+          </button>                          
         </div>
       </div>
-    </form>
+    </div>
+    <div class="modal-background" />
   </div>
 </template>
 
 <script>
-import { mapState, mapMutations } from 'vuex'
+import Input from '@/components/common/Input'
+
 export default {
   name: 'Submit',
+  components: {
+    Input
+  },
   data: function () {
     return {
-      name: "",
-      description: "",
-      ingredients: "",
-      directions: "",
-      prepTime: 0,
-      cookTime: 0,
-      feeds: 0,
+      recipeModel: {
+        name: "",
+        description: "",
+        ingredients: "",
+        directions: "",
+        prepTime: 0,
+        cookTime: 0,
+        feeds: 0,
+      }
     }
   },
   methods: {
     submitRecipe() {
       const recipe = {
-        name: this.name,
-        description: this.description,
-        ingredients: this.ingredients,
-        directions: this.directions,
-        prepTime: this.prepTime,
-        cookTime: this.cookTime,
-        feeds: this.feeds,
+        name: this.recipeModel.name,
+        description: this.recipeModel.description,
+        ingredients: this.recipeModel.ingredients,
+        directions: this.recipeModel.directions,
+        prepTime: this.recipeModel.prepTime,
+        cookTime: this.recipeModel.cookTime,
+        feeds: this.recipeModel.feeds,
       };
 
       this.$store.dispatch('SUBMIT_NEW_RECIPE', recipe)
@@ -116,20 +82,67 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h3 {
-  margin: 40px 0 0;
+.submit-modal {
+  background: white;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) !important;
+  z-index: 15;
+  width: 600px;
+  height: 600px;
+  border: 1px solid lightgrey;
+  padding: 24px;
 }
 
 .container {
+  height: 100%;
+  width: 100%;
   display: grid;
-  grid-template-columns: 1fr 1fr
+  grid-template-rows: 45% 55%;
 }
 
-.left-side {
+.top-container {
+  display: grid;
+  grid-template-columns: 60% 40%;
+}
+
+.image-upload {
+  height: 270px;
+  width: 300px;
+  justify-self: left;
+  background-color: lightgray;
+  border: 1px solid #D5D1D1;
+}
+
+.short-input {
+  display: grid;
+  grid-row-gap: auto;
+}
+
+.bottom-container {
   display: grid;
 }
 
-.right-side {
-  display: grid;
+label {
+  float: left;
+}
+
+input {
+  float: left;
+}
+
+button {
+  width: 60px;
+}
+
+.modal-background {
+  background: rgba(0, 0, 0, .30);
+  height: 100%;
+  width: 100%;
+  z-index: 10;
+  position: fixed;
+  left: 0;
+  top: 0;
 }
 </style>
