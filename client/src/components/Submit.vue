@@ -20,20 +20,28 @@
           </div>
         </div>
         <div class="bottom-container">
-          <Input 
-            v-model="recipeModel.description"
-            label-name="Description" />
-          <Input 
-            v-model="recipeModel.ingredients"
-            label-name="Ingredients" />
-          <Input 
-            v-model="recipeModel.directions"
-            label-name="Directions" />                  
-          <button
-            type="button"
-            @click="submitRecipe">
-            Submit
-          </button>                          
+          <div class="textarea-container">
+            <label>Description</label>
+            <textarea
+              v-model="recipeModel.description" />
+          </div>
+          <div class="textarea-container">
+            <label>Ingredients</label>
+            <textarea
+              v-model="recipeModel.ingredients" />
+          </div>
+          <div class="textarea-container">
+            <label>Directions</label>
+            <textarea
+              v-model="recipeModel.directions" />
+          </div>         
+          <div class="submit-container">
+            <button
+              type="button"
+              @click="submitRecipe">
+              Submit
+            </button>    
+          </div>                                     
         </div>
       </div>
     </div>
@@ -99,20 +107,26 @@ export default {
   height: 100%;
   width: 100%;
   display: grid;
-  grid-template-rows: 45% 55%;
+  grid-template-rows: 38% 62%;
+  grid-row-gap: 8px;
 }
 
 .top-container {
   display: grid;
-  grid-template-columns: 60% 40%;
+  grid-template-columns: 50% 50%;
 }
 
 .image-upload {
-  height: 270px;
-  width: 300px;
-  justify-self: left;
+  height: 100%;
+  width: 90%;
   background-color: lightgray;
   border: 1px solid #D5D1D1;
+}
+
+.textarea-container {
+  display: grid;
+  grid-row-gap: 5px;
+  grid-template-rows: 20px 1fr;
 }
 
 .short-input {
@@ -122,6 +136,7 @@ export default {
 
 .bottom-container {
   display: grid;
+  grid-row-gap: 10px;
 }
 
 label {
@@ -133,7 +148,16 @@ input {
 }
 
 button {
-  width: 60px;
+  width: 100px;
+}
+
+textarea {
+  resize: none;
+}
+
+.submit-container {
+  align-self: center;
+  justify-self: end;
 }
 
 .modal-background {

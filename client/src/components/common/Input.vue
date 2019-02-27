@@ -32,4 +32,9 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+  .input-container {
+    display: grid;
+    grid-row-gap: 5px;
+    grid-template-rows: 20px 30px;
+  }
 </style>
