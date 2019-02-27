@@ -1,17 +1,43 @@
 <template>
   <div id="app">
-    <Submit />
+    <div class="header">
+      <div class="icon">
+        <RouterLink to="/">
+          <a class="router">
+            Icon
+          </a>
+        </RouterLink>
+      </div>
+      <div class="link">
+        <RouterLink to="/">
+          <a class="router">
+            Home
+          </a>
+        </RouterLink>
+      </div>
+      <div class="link">
+        <RouterLink to="/recipes">
+          <a class="router">
+            Recipes
+          </a>
+        </RouterLink>
+      </div>
+      <div />
+      <div class="link">
+        <RouterLink to="/submit">
+          <a class="router">
+            Submit
+          </a>
+        </RouterLink>
+      </div>
+    </div>
+    <RouterView />
   </div>
 </template>
 
 <script>
-import Submit from './components/Submit.vue'
-
 export default {
   name: 'App',
-  components: {
-    Submit
-  }
 }
 </script>
 
@@ -20,8 +46,35 @@ export default {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
+  /* text-align: center; */
   color: #2c3e50;
-  margin-top: 60px;
+  /* margin-top: 60px; */
+}
+
+.header {
+  display: grid;
+  grid-template-columns: 50px 150px 150px 1fr 150px;
+  background-color: lightblue;
+  height: 50px;
+}
+
+.icon {
+  background-color: orange;
+}
+
+.link {
+  display: grid;
+  justify-items: center;
+  align-items: center;
+}
+
+.link:hover {
+  cursor: pointer;
+  background-color: gray;
+}
+
+a:-webkit-any-link {
+  color: black;
+  text-decoration-line: none;
 }
 </style>
