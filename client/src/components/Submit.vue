@@ -8,15 +8,38 @@
             <Input 
               v-model="recipeModel.name"
               label-name="Name" />
-            <Input 
-              v-model="recipeModel.prepTime"
-              label-name="Prep Time" />
-            <Input 
-              v-model="recipeModel.cookTime"
-              label-name="Cook Time" />
-            <Input 
-              v-model="recipeModel.feeds"
-              label-name="Servings" />                             
+            <div class="time-input">
+              <Input 
+                v-model="recipeModel.prepTime"
+                label-name="Prep Time" />
+              <Input 
+                v-model="recipeModel.cookTime"
+                label-name="Cook Time" />
+            </div>
+            <div class="time-input">
+              <Input 
+                v-model="recipeModel.feeds"
+                label-name="Servings" />
+              <div class="prep-container">
+                <label>
+                  Preperation 
+                </label>
+                <select class="prep-input">
+                  <option value="bake">
+                    Bake
+                  </option>
+                  <option value="pan">
+                    Pan
+                  </option>
+                  <option value="pressureCooker">
+                    Pressure Cooker
+                  </option>                
+                  <option value="slowCooker">
+                    Slow Cooker
+                  </option>
+                </select>
+              </div>
+            </div>                      
           </div>
         </div>
         <div class="bottom-container">
@@ -108,7 +131,7 @@ export default {
   width: 100%;
   display: grid;
   grid-template-rows: 38% 62%;
-  grid-row-gap: 8px;
+  grid-row-gap: 1rem;
 }
 
 .top-container {
@@ -131,7 +154,24 @@ export default {
 
 .short-input {
   display: grid;
+  grid-template-rows: auto auto auto;
   grid-row-gap: auto;
+}
+
+.time-input {
+  display: grid;
+  grid-template-columns: 145px auto;
+  column-gap: 10px;
+}
+
+.prep-container {
+  display: grid;
+  grid-template-rows: 20px 30px;
+  row-gap: 5px;
+}
+
+.prep-input {
+  height: 30px;
 }
 
 .bottom-container {
