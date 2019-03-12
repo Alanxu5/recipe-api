@@ -6,11 +6,23 @@ import Recipes from '@/components/Recipes.vue'
 import Submit from '@/components/Submit.vue'
 import Home from '@/components/Home.vue'
 
-// TODO: necessary?
+// tells vue to use vue router
 Vue.use(Router)
 
 export default new Router({
   routes: [
+    {
+      path: '/recipes',
+      name: 'recipes',
+      component: Recipes,
+      children: [
+        {
+          path: '/recipes/submit',
+          name: 'submit',
+          component: Submit
+        }
+      ]
+    },
     {
       path: '/',
       name: 'home',
@@ -22,11 +34,6 @@ export default new Router({
           component: Submit
         }
       ]
-    },
-    {
-      path: '/recipes',
-      name: 'recipes',
-      component: Recipes,
     }
   ]
 })

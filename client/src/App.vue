@@ -24,7 +24,9 @@
       </div>
       <div />
       <div class="link">
-        <RouterLink to="/submit">
+        <RouterLink 
+          to="submit" 
+          append>
           <a class="router">
             Submit
           </a>
