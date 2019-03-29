@@ -10,7 +10,7 @@
 
 <script>
 export default {
-  name: 'Input',
+  name: 'TextInput',
   props: {
     labelName: {
       type: String,

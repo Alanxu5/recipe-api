@@ -5,19 +5,19 @@
         <div class="top-container">
           <div class="image-upload" />
           <div class="short-input">
-            <Input 
+            <TextInput 
               v-model="recipeModel.name"
               label-name="Name" />
             <div class="time-input">
-              <Input 
+              <TextInput 
                 v-model="recipeModel.prepTime"
                 label-name="Prep Time" />
-              <Input 
+              <TextInput 
                 v-model="recipeModel.cookTime"
                 label-name="Cook Time" />
             </div>
             <div class="time-input">
-              <Input 
+              <TextInput 
                 v-model="recipeModel.feeds"
                 label-name="Servings" />
               <div class="prep-container">
@@ -73,12 +73,12 @@
 </template>
 
 <script>
-import Input from '@/components/common/Input'
+import TextInput from '@/components/common/TextInput'
 
 export default {
   name: 'Submit',
   components: {
-    Input
+    TextInput
   },
   data: function () {
     return {
@@ -183,7 +183,7 @@ label {
   float: left;
 }
 
-input {
+text-input {
   float: left;
 }
 
