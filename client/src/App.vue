@@ -1,6 +1,21 @@
 <script>
+import Submit from '@/components/Submit'
+
 export default {
   name: 'App',
+  components: {
+    Submit
+  },
+  data() {
+    return {
+      showModal: false
+    };
+  },
+  methods: {
+    toggleModal() {
+      this.showModal = !this.showModal;
+    }
+  }
 }
 </script>
 
@@ -29,17 +44,14 @@ export default {
         </RouterLink>
       </div>
       <div />
-      <div class="link">
-        <RouterLink 
-          to="submit" 
-          append>
-          <a class="router">
-            Submit
-          </a>
-        </RouterLink>
+      <div 
+        class="link"
+        @click="toggleModal">
+        Submit
       </div>
     </div>
     <RouterView />
+    <Submit v-if="showModal" />
   </div>
 </template>
 
