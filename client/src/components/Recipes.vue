@@ -1,3 +1,20 @@
+<script>
+import { mapState, mapMutations } from 'vuex'
+
+export default {
+  name: 'Recipes',
+  created() {
+    this.name = this.$route.params.recipeData.name;
+    this.description = this.$route.params.recipeData.description;
+    this.ingredients = this.$route.params.recipeData.ingredients;
+    this.directions = this.$route.params.recipeData.directions;
+    this.prepTime = this.$route.params.recipeData.prepTime;
+    this.cookTime = this.$route.params.recipeData.cookTime;
+    this.feeds = this.$route.params.recipeData.feeds;
+  }
+}
+</script>
+
 <template>
   <div class="recipe-container">
     <h1>View Recipes</h1>
@@ -32,24 +49,6 @@
     <RouterView />
   </div>
 </template>
-
-<script>
-import { mapState, mapMutations } from 'vuex'
-export default {
-  name: 'Recipes',
-  created() {
-    this.name = this.$route.params.recipeData.name;
-    this.description = this.$route.params.recipeData.description;
-    this.ingredients = this.$route.params.recipeData.ingredients;
-    this.directions = this.$route.params.recipeData.directions;
-    this.prepTime = this.$route.params.recipeData.prepTime;
-    this.cookTime = this.$route.params.recipeData.cookTime;
-    this.feeds = this.$route.params.recipeData.feeds;
-  },
-  methods: {
-  },
-}
-</script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>

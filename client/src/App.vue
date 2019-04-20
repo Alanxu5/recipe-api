@@ -1,3 +1,9 @@
+<script>
+export default {
+  name: 'App',
+}
+</script>
+
 <template>
   <div id="app">
     <div class="header">
@@ -37,12 +43,6 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'App',
-}
-</script>
-
 <style>
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
@@ -53,9 +53,9 @@ export default {
 
 .header {
   display: grid;
-  grid-template-columns: 50px 150px 150px 1fr 150px;
+  grid-template-columns: minmax(2rem, 5%) minmax(9rem, 15%) minmax(9rem, 15%) 1fr minmax(9rem, 15%);
   background-color: lightblue;
-  height: 50px;
+  height: 3rem;
 }
 
 .icon {

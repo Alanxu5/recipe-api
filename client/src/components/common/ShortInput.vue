@@ -1,15 +1,14 @@
-<script>
-export default {
-  name: 'Home'
-}
-</script>
-
 <template>
   <div>
     HOME
-    <RouterView />
   </div>
 </template>
+
+<script>
+export default {
+  name: 'ShortInput'
+}
+</script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>

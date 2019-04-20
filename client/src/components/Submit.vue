@@ -1,3 +1,42 @@
+<script>
+import TextInput from '@/components/common/TextInput'
+
+export default {
+  name: 'Submit',
+  components: {
+    TextInput
+  },
+  data() {
+    return {
+      recipeModel: {
+        name: "",
+        description: "",
+        ingredients: "",
+        directions: "",
+        prepTime: 0,
+        cookTime: 0,
+        feeds: 0,
+      }
+    }
+  },
+  methods: {
+    submitRecipe() {
+      const recipe = {
+        name: this.recipeModel.name,
+        description: this.recipeModel.description,
+        ingredients: this.recipeModel.ingredients,
+        directions: this.recipeModel.directions,
+        prepTime: this.recipeModel.prepTime,
+        cookTime: this.recipeModel.cookTime,
+        feeds: this.recipeModel.feeds,
+      };
+
+      this.$store.dispatch('SUBMIT_NEW_RECIPE', recipe)
+    }
+  },
+}
+</script>
+
 <template>
   <div>
     <div class="submit-modal">
@@ -71,45 +110,6 @@
     <div class="modal-background" />
   </div>
 </template>
-
-<script>
-import TextInput from '@/components/common/TextInput'
-
-export default {
-  name: 'Submit',
-  components: {
-    TextInput
-  },
-  data: function () {
-    return {
-      recipeModel: {
-        name: "",
-        description: "",
-        ingredients: "",
-        directions: "",
-        prepTime: 0,
-        cookTime: 0,
-        feeds: 0,
-      }
-    }
-  },
-  methods: {
-    submitRecipe() {
-      const recipe = {
-        name: this.recipeModel.name,
-        description: this.recipeModel.description,
-        ingredients: this.recipeModel.ingredients,
-        directions: this.recipeModel.directions,
-        prepTime: this.recipeModel.prepTime,
-        cookTime: this.recipeModel.cookTime,
-        feeds: this.recipeModel.feeds,
-      };
-
-      this.$store.dispatch('SUBMIT_NEW_RECIPE', recipe)
-    }
-  },
-}
-</script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
