@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
-	"recipe/api/handlers"
+	"recipe-api/handlers"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"

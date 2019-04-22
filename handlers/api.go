@@ -3,7 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"net/http"
-	"recipe/api/models"
+	"recipe-api/models"
 	"strconv"
 
 	"github.com/labstack/echo"
