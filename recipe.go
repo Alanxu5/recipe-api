@@ -6,9 +6,9 @@ import (
 	"os"
 	"recipe-api/handlers"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	_ "github.com/lib/pq" // loading the driver anonymously, using _ so none of its exported names are visible
 )
 
 var db *sql.DB
@@ -23,7 +23,6 @@ const (
 
 func main() {
 	initDb()
-	migrate(db)
 
 	// idiomatic to use if the db should not have a lifetime beyond the scope of the function.
 	defer db.Close()
@@ -47,13 +46,11 @@ func initDb() {
 	var err error
 
 	// all the information needed to connect to DB
-	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		config[dbhost], config[dbport],
+	mysqlInfo := fmt.Sprintf("%s:%s@/%s",
 		config[dbuser], config[dbpass], config[dbname])
 
 	// sql.Open() does not establish any connection to the DB
-	db, err = sql.Open("postgres", psqlInfo)
+	db, err = sql.Open("mysql", mysqlInfo)
 	if err != nil {
 		panic(err)
 	}
@@ -94,23 +91,4 @@ func dbConfig() map[string]string {
 	conf[dbpass] = password
 	conf[dbname] = name
 	return conf
-}
-
-func migrate(db *sql.DB) {
-	sql := `
-	CREATE TABLE IF NOT EXISTS recipes (
-			id SERIAL,
-			name TEXT NOT NULL,
-			description TEXT NOT NULL,
-			prep_time SMALLINT NOT NULL,
-			cook_time SMALLINT NOT NULL,
-			feeds SMALLINT NOT NULL
-	);
-	`
-
-	_, err := db.Exec(sql)
-	// Exit if something goes wrong with our SQL statement above
-	if err != nil {
-		panic(err)
-	}
 }
