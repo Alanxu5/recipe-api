@@ -6,22 +6,22 @@ import (
 )
 
 type Recipe struct {
+	ID          int             `json:"id"`
 	Name        string          `json:"name"`
 	Description string          `json:"description"`
-	Ingredients string          `json:"ingredients"`
 	Directions  json.RawMessage `json:"directions"`
 	PrepTime    int             `json:"prepTime"`
 	CookTime    int             `json:"cookTime"`
-	Feeds       int             `json:"feeds"`
+	Feeds       int             `json:"servings"`
 	Type        int             `json:"type"`
 	Method      int             `json:"method"`
 }
 
 type RecipeCollection struct {
-	Recipes []Recipe `json:"items"`
+	Recipes []Recipe `json:"recipes"`
 }
 
-func GetRecipes(db *sql.DB) RecipeCollection {
+func GetAllRecipes(db *sql.DB) RecipeCollection {
 	sql := "SELECT * FROM recipe"
 
 	rows, err := db.Query(sql)
@@ -36,7 +36,10 @@ func GetRecipes(db *sql.DB) RecipeCollection {
 
 	for rows.Next() {
 		recipe := Recipe{}
-		// err := rows.Scan(&recipe.ID, &recipe.Name)
+
+		// has to be in the same order as DB columns
+		err := rows.Scan(&recipe.ID, &recipe.Name, &recipe.PrepTime, &recipe.CookTime,
+			&recipe.Feeds, &recipe.Method, &recipe.Type, &recipe.Description, &recipe.Directions)
 
 		if err != nil {
 			panic(err)

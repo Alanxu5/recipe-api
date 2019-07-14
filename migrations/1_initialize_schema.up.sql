@@ -4,8 +4,8 @@ CREATE TABLE `recipe` (
     `prep_time` int   NOT NULL, 
     `cook_time` int   NOT NULL,
     `servings` int   NOT NULL,
-    `method` varchar(20)   NOT NULL,
-    `type` varchar(20)   NOT NULL,
+    `method` int   NOT NULL,
+    `type` int   NOT NULL,
     `description` varchar(500)   NOT NULL,
     `directions` JSON   NOT NULL,
     CONSTRAINT `pk_recipe` PRIMARY KEY (
@@ -15,13 +15,13 @@ CREATE TABLE `recipe` (
 
 -- bake, slow cooker, rice cooker, pan
 CREATE TABLE `method` (
-    `id` varchar(20)   UNIQUE NOT NULL,
+    `id` int   UNIQUE NOT NULL,
     `name` varchar(20)   NOT NULL
 );
 
 -- protein, vegetables, carbs
 CREATE TABLE `type` (
-    `id` varchar(20)   NOT NULL,
+    `id` int   NOT NULL,
     `name` varchar(20)   NOT NULL,
     CONSTRAINT `pk_type` PRIMARY KEY (
         `id`

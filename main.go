@@ -34,7 +34,7 @@ func main() {
 	// TODO: need to restrict
 	e.Use(middleware.CORS())
 
-	e.GET("/recipes", handlers.GetRecipe(db))
+	e.GET("/recipes", handlers.GetAllRecipes(db))
 	e.POST("/recipes", handlers.CreateRecipe(db))
 	e.DELETE("/recipes/:id", handlers.DeleteRecipe(db))
 

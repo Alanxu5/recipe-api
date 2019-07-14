@@ -11,9 +11,9 @@ import (
 
 type H map[string]interface{}
 
-func GetRecipe(db *sql.DB) echo.HandlerFunc {
+func GetAllRecipes(db *sql.DB) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		return c.JSON(http.StatusOK, models.GetRecipes(db))
+		return c.JSON(http.StatusOK, models.GetAllRecipes(db))
 	}
 }
 
