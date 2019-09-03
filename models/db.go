@@ -1,4 +1,4 @@
-package db
+package models
 
 import (
 	"database/sql"
@@ -8,7 +8,17 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-func InitDb() *sql.DB {
+type Datastore interface {
+	GetAllRecipes() ([]*Recipe, error)
+	CreateRecipe(recipe Recipe) (int64, error)
+	DeleteRecipe(id int) (int64, error)
+}
+
+type DB struct {
+	*sql.DB
+}
+
+func InitDb() (*DB, error) {
 	config := dbConfig()
 	var err error
 
@@ -21,17 +31,17 @@ func InitDb() *sql.DB {
 	// sql.Open() does not establish any connection to the DB
 	db, err := sql.Open("mysql", mysqlInfo)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	// db.Ping() checks if the DB is available and accessible
 	err = db.Ping()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	fmt.Println("Successfully connected!")
 
-	return db
+	return &DB{db}, nil
 }
 
 func dbConfig() map[string]string {

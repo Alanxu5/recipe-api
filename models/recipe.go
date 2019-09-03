@@ -1,7 +1,6 @@
 package models
 
 import (
-	"database/sql"
 	"encoding/json"
 )
 
@@ -17,66 +16,61 @@ type Recipe struct {
 	Method      int             `json:"method"`
 }
 
-type RecipeCollection struct {
-	Recipes []Recipe `json:"recipes"`
-}
-
-func GetAllRecipes(db *sql.DB) RecipeCollection {
+func (db *DB) GetAllRecipes() ([]*Recipe, error) {
 	sql := "SELECT * FROM recipe"
 
 	rows, err := db.Query(sql)
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	defer rows.Close()
 
-	result := RecipeCollection{}
-
+	recipes := make([]*Recipe, 0)
 	for rows.Next() {
-		recipe := Recipe{}
+		recipe := new(Recipe)
 
 		// has to be in the same order as DB columns
 		err := rows.Scan(&recipe.ID, &recipe.Name, &recipe.PrepTime, &recipe.CookTime,
 			&recipe.Feeds, &recipe.Method, &recipe.Type, &recipe.Description, &recipe.Directions)
 
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
-		result.Recipes = append(result.Recipes, recipe)
+		recipes = append(recipes, recipe)
 	}
 
-	return result
+	return recipes, nil
 }
 
-func CreateRecipe(db *sql.DB, recipe Recipe) (int64, error) {
+func (db *DB) CreateRecipe(recipe Recipe) (int64, error) {
 	jsonString, err := json.Marshal(recipe.Directions)
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
 
 	var lastInsertId int64
 	res, err := db.Exec("INSERT INTO recipe (name, description, prep_time, cook_time, servings, method, type, directions) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", recipe.Name, recipe.Description, recipe.PrepTime, recipe.CookTime, recipe.Feeds, recipe.Method, recipe.Type, jsonString)
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
 
 	lastInsertId, error := res.LastInsertId()
 
 	if error != nil {
-		panic(err)
+		return 0, err
 	}
 
 	return lastInsertId, nil
 }
 
-func DeleteRecipe(db *sql.DB, id int) (int64, error) {
+func (db *DB) DeleteRecipe(id int) (int64, error) {
 	var deletedId int64
 	err := db.QueryRow("DELETE FROM recipes WHERE id = $1 RETURNING id", id).Scan(&deletedId)
 
 	if err != nil {
-		panic(err)
+		return 0, err
 	}
 
 	return deletedId, nil
