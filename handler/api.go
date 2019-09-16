@@ -20,6 +20,15 @@ func (env *Env) GetAllRecipes(c echo.Context) error {
 	return c.JSON(http.StatusOK, recipes)
 }
 
+func (env *Env) GetRecipe(c echo.Context) error {
+	id, _ := strconv.Atoi(c.Param("id"))
+	recipe, err := env.DB.GetRecipe(id)
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, recipe)
+}
+
 func (env *Env) CreateRecipe(c echo.Context) error {
 	// init a new recipe
 	var recipe models.Recipe

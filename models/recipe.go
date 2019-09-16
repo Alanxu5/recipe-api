@@ -44,6 +44,24 @@ func (db *DB) GetAllRecipes() ([]*Recipe, error) {
 	return recipes, nil
 }
 
+func (db *DB) GetRecipe(id int) (*Recipe, error) {
+	sql := "SELECT * FROM recipe WHERE id = ?"
+
+	row := db.QueryRow(sql, id)
+
+	recipe := new(Recipe)
+
+	// has to be in the same order as DB columns
+	err := row.Scan(&recipe.ID, &recipe.Name, &recipe.PrepTime, &recipe.CookTime,
+		&recipe.Feeds, &recipe.Method, &recipe.Type, &recipe.Description, &recipe.Directions)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return recipe, nil
+}
+
 func (db *DB) CreateRecipe(recipe Recipe) (int64, error) {
 	jsonString, err := json.Marshal(recipe.Directions)
 	if err != nil {

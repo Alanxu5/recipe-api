@@ -26,6 +26,7 @@ func main() {
 	e.Use(middleware.CORS())
 
 	e.GET("/recipes", env.GetAllRecipes)
+	e.GET("/recipe/:id", env.GetRecipe)
 	e.POST("/recipes", env.CreateRecipe)
 	e.DELETE("/recipes/:id", env.DeleteRecipe)
 
