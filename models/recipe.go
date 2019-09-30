@@ -11,7 +11,7 @@ type Recipe struct {
 	Directions  json.RawMessage `json:"directions"`
 	PrepTime    int             `json:"prepTime"`
 	CookTime    int             `json:"cookTime"`
-	Feeds       int             `json:"servings"`
+	Feeds       int             `json:"feeds"`
 	Type        int             `json:"type"`
 	Method      int             `json:"method"`
 }
