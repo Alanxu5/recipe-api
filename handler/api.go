@@ -57,3 +57,11 @@ func (env *Env) DeleteRecipe(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, deletedId)
 }
+
+func (env *Env) GetTypes(c echo.Context) error {
+	types, err := env.DB.GetTypes()
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, types)
+}

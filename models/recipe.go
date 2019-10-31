@@ -5,7 +5,7 @@ import (
 )
 
 type Recipe struct {
-	ID          int             `json:"id"`
+	Id          int             `json:"id"`
 	Name        string          `json:"name"`
 	Description string          `json:"description"`
 	Directions  json.RawMessage `json:"directions"`
@@ -14,6 +14,11 @@ type Recipe struct {
 	Feeds       int             `json:"feeds"`
 	Type        int             `json:"type"`
 	Method      int             `json:"method"`
+}
+
+type Type struct {
+	Id   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 func (db *DB) GetAllRecipes() ([]*Recipe, error) {
@@ -32,7 +37,7 @@ func (db *DB) GetAllRecipes() ([]*Recipe, error) {
 		recipe := new(Recipe)
 
 		// has to be in the same order as DB columns
-		err := rows.Scan(&recipe.ID, &recipe.Name, &recipe.PrepTime, &recipe.CookTime,
+		err := rows.Scan(&recipe.Id, &recipe.Name, &recipe.PrepTime, &recipe.CookTime,
 			&recipe.Feeds, &recipe.Method, &recipe.Type, &recipe.Description, &recipe.Directions)
 
 		if err != nil {
@@ -52,7 +57,7 @@ func (db *DB) GetRecipe(id int) (*Recipe, error) {
 	recipe := new(Recipe)
 
 	// has to be in the same order as DB columns
-	err := row.Scan(&recipe.ID, &recipe.Name, &recipe.PrepTime, &recipe.CookTime,
+	err := row.Scan(&recipe.Id, &recipe.Name, &recipe.PrepTime, &recipe.CookTime,
 		&recipe.Feeds, &recipe.Method, &recipe.Type, &recipe.Description, &recipe.Directions)
 
 	if err != nil {
@@ -83,13 +88,41 @@ func (db *DB) CreateRecipe(recipe Recipe) (int64, error) {
 	return lastInsertId, nil
 }
 
+// TODO - implement
 func (db *DB) DeleteRecipe(id int) (int64, error) {
 	var deletedId int64
-	err := db.QueryRow("DELETE FROM recipes WHERE id = $1 RETURNING id", id).Scan(&deletedId)
+	err := db.QueryRow("DELETE FROM recipe WHERE id = $1 RETURNING id", id).Scan(&deletedId)
 
 	if err != nil {
 		return 0, err
 	}
 
 	return deletedId, nil
+}
+
+func (db *DB) GetTypes() ([]*Type, error) {
+	sql := "SELECT * FROM type"
+
+	rows, err := db.Query(sql)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	types := make([]*Type, 0)
+
+	for rows.Next() {
+		recipeType := new(Type)
+
+		err := rows.Scan(&recipeType.Id, &recipeType.Name)
+
+		if err != nil {
+			return nil, err
+		}
+		types = append(types, recipeType)
+	}
+
+	return types, nil
 }
