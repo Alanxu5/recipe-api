@@ -21,6 +21,11 @@ type Type struct {
 	Name string `json:"name"`
 }
 
+type Method struct {
+	Id   int    `json:"id"`
+	Name string `json:"name"`
+}
+
 func (db *DB) GetAllRecipes() ([]*Recipe, error) {
 	sql := "SELECT * FROM recipe"
 
@@ -125,4 +130,31 @@ func (db *DB) GetTypes() ([]*Type, error) {
 	}
 
 	return types, nil
+}
+
+func (db *DB) GetMethods() ([]*Method, error) {
+	sql := "SELECT * FROM method"
+
+	rows, err := db.Query(sql)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	methods := make([]*Method, 0)
+
+	for rows.Next() {
+		recipeMethod := new(Method)
+
+		err := rows.Scan(&recipeMethod.Id, &recipeMethod.Name)
+
+		if err != nil {
+			return nil, err
+		}
+		methods = append(methods, recipeMethod)
+	}
+
+	return methods, nil
 }

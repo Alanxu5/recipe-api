@@ -65,3 +65,11 @@ func (env *Env) GetTypes(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, types)
 }
+
+func (env *Env) GetMethods(c echo.Context) error {
+	methods, err := env.DB.GetMethods()
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, methods)
+}

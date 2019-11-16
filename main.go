@@ -30,6 +30,7 @@ func main() {
 	e.POST("/recipes", env.CreateRecipe)
 	// e.DELETE("/recipes/:id", env.DeleteRecipe)
 	e.GET("/recipes/types", env.GetTypes)
+	e.GET("recipes/methods", env.GetMethods)
 
 	e.Logger.Fatal(e.Start("127.0.0.1:8000"))
 }

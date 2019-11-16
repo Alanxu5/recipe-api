@@ -14,6 +14,7 @@ type Datastore interface {
 	DeleteRecipe(id int) (int64, error)
 	GetRecipe(id int) (*Recipe, error)
 	GetTypes() ([]*Type, error)
+	GetMethods() ([]*Method, error)
 }
 
 type DB struct {
