@@ -2,14 +2,14 @@ package handler
 
 import (
 	"net/http"
-	"recipe-api/models"
+	"recipe-api/model"
 	"strconv"
 
 	"github.com/labstack/echo"
 )
 
 type Env struct {
-	DB models.Datastore
+	DB model.Datastore
 }
 
 func (env *Env) GetAllRecipes(c echo.Context) error {
@@ -31,7 +31,7 @@ func (env *Env) GetRecipe(c echo.Context) error {
 
 func (env *Env) CreateRecipe(c echo.Context) error {
 	// init a new recipe
-	var recipe models.Recipe
+	var recipe model.Recipe
 
 	// map incoming JSON body to the new recipe
 	c.Bind(&recipe)

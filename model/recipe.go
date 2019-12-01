@@ -1,30 +1,8 @@
-package models
+package model
 
 import (
 	"encoding/json"
 )
-
-type Recipe struct {
-	Id          int             `json:"id"`
-	Name        string          `json:"name"`
-	Description string          `json:"description"`
-	Directions  json.RawMessage `json:"directions"`
-	PrepTime    int             `json:"prepTime"`
-	CookTime    int             `json:"cookTime"`
-	Feeds       int             `json:"feeds"`
-	Type        int             `json:"type"`
-	Method      int             `json:"method"`
-}
-
-type Type struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
-}
-
-type Method struct {
-	Id   int    `json:"id"`
-	Name string `json:"name"`
-}
 
 func (db *DB) GetAllRecipes() ([]*Recipe, error) {
 	sql := "SELECT * FROM recipe"
@@ -55,7 +33,11 @@ func (db *DB) GetAllRecipes() ([]*Recipe, error) {
 }
 
 func (db *DB) GetRecipe(id int) (*Recipe, error) {
-	sql := "SELECT * FROM recipe WHERE id = ?"
+	sql := `SELECT r.id, r.name, r.prep_time, r.cook_time, r.servings, m.name as method, r.type, r.description, r.directions
+		FROM recipe AS r
+		JOIN method AS m 
+		ON r.method = m.id
+		WHERE r.id = ?`
 
 	row := db.QueryRow(sql, id)
 
@@ -78,8 +60,17 @@ func (db *DB) CreateRecipe(recipe Recipe) (int64, error) {
 		return 0, err
 	}
 
+	sql := "SELECT * FROM method WHERE name = ?"
+	row := db.QueryRow(sql, recipe.Method)
+	recipeMethod := new(Method)
+	errMethod := row.Scan(&recipeMethod.Id, &recipeMethod.Name)
+
+	if errMethod != nil {
+		return 0, errMethod
+	}
+
 	var lastInsertId int64
-	res, err := db.Exec("INSERT INTO recipe (name, description, prep_time, cook_time, servings, method, type, directions) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", recipe.Name, recipe.Description, recipe.PrepTime, recipe.CookTime, recipe.Feeds, recipe.Method, recipe.Type, jsonString)
+	res, err := db.Exec("INSERT INTO recipe (name, description, prep_time, cook_time, servings, method, type, directions) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", recipe.Name, recipe.Description, recipe.PrepTime, recipe.CookTime, recipe.Feeds, recipeMethod.Id, recipe.Type, jsonString)
 	if err != nil {
 		return 0, err
 	}
