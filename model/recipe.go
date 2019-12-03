@@ -33,11 +33,13 @@ func (db *DB) GetAllRecipes() ([]*Recipe, error) {
 }
 
 func (db *DB) GetRecipe(id int) (*Recipe, error) {
-	sql := `SELECT r.id, r.name, r.prep_time, r.cook_time, r.servings, m.name as method, r.type, r.description, r.directions
-		FROM recipe AS r
-		JOIN method AS m 
-		ON r.method = m.id
-		WHERE r.id = ?`
+	sql := `SELECT r.id, r.name, r.prep_time, r.cook_time, r.servings, m.name AS method, rt.name AS type, r.description, r.directions
+					FROM recipe AS r
+					JOIN method AS m 
+					ON r.method = m.id
+					JOIN type AS rt
+					ON r.type = rt.id
+					WHERE r.id = ?`
 
 	row := db.QueryRow(sql, id)
 
@@ -60,8 +62,8 @@ func (db *DB) CreateRecipe(recipe Recipe) (int64, error) {
 		return 0, err
 	}
 
-	sql := "SELECT * FROM method WHERE name = ?"
-	row := db.QueryRow(sql, recipe.Method)
+	methodSql := "SELECT * FROM method WHERE name = ?"
+	row := db.QueryRow(methodSql, recipe.Method)
 	recipeMethod := new(Method)
 	errMethod := row.Scan(&recipeMethod.Id, &recipeMethod.Name)
 
@@ -69,8 +71,17 @@ func (db *DB) CreateRecipe(recipe Recipe) (int64, error) {
 		return 0, errMethod
 	}
 
+	typeSql := "SELECT * FROM type WHERE name = ?"
+	typeRow := db.QueryRow(typeSql, recipe.Type)
+	recipeType := new(Type)
+	errType := typeRow.Scan(&recipeType.Id, &recipeType.Name)
+
+	if errType != nil {
+		return 0, errType
+	}
+
 	var lastInsertId int64
-	res, err := db.Exec("INSERT INTO recipe (name, description, prep_time, cook_time, servings, method, type, directions) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", recipe.Name, recipe.Description, recipe.PrepTime, recipe.CookTime, recipe.Feeds, recipeMethod.Id, recipe.Type, jsonString)
+	res, err := db.Exec("INSERT INTO recipe (name, description, prep_time, cook_time, servings, method, type, directions) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", recipe.Name, recipe.Description, recipe.PrepTime, recipe.CookTime, recipe.Feeds, recipeMethod.Id, recipeType.Id, jsonString)
 	if err != nil {
 		return 0, err
 	}

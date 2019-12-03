@@ -14,7 +14,7 @@ type Recipe struct {
 	PrepTime    int             `json:"prepTime"`
 	CookTime    int             `json:"cookTime"`
 	Feeds       int             `json:"feeds"`
-	Type        int             `json:"type"`
+	Type        string          `json:"type"`
 	Method      string          `json:"method"`
 }
 

@@ -21,7 +21,7 @@ type DB struct {
 	*sql.DB
 }
 
-func InitDb() (*DB, error) {
+func InitDB() (*DB, error) {
 	config := dbConfig()
 	var err error
 

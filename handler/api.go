@@ -41,7 +41,6 @@ func (env *Env) CreateRecipe(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
 	return c.JSON(http.StatusOK, id)
 }
 
@@ -54,7 +53,6 @@ func (env *Env) DeleteRecipe(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
 	return c.JSON(http.StatusOK, deletedId)
 }
 

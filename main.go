@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	db, err := model.InitDb()
+	db, err := model.InitDB()
 
 	if err != nil {
 		log.Panic(err)
