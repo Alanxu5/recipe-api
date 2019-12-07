@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"log"
 )
 
 func (db *DB) GetAllRecipes() ([]*Recipe, error) {
@@ -13,7 +14,9 @@ func (db *DB) GetAllRecipes() ([]*Recipe, error) {
 		return nil, err
 	}
 
-	defer rows.Close()
+	if rowErr := rows.Close(); rowErr != nil {
+		log.Println(err)
+	}
 
 	recipes := make([]*Recipe, 0)
 	for rows.Next() {
@@ -21,7 +24,7 @@ func (db *DB) GetAllRecipes() ([]*Recipe, error) {
 
 		// has to be in the same order as DB columns
 		err := rows.Scan(&recipe.Id, &recipe.Name, &recipe.PrepTime, &recipe.CookTime,
-			&recipe.Feeds, &recipe.Method, &recipe.Type, &recipe.Description, &recipe.Directions)
+			&recipe.Servings, &recipe.Method, &recipe.Type, &recipe.Description, &recipe.Directions)
 
 		if err != nil {
 			return nil, err
@@ -47,7 +50,7 @@ func (db *DB) GetRecipe(id int) (*Recipe, error) {
 
 	// has to be in the same order as DB columns
 	err := row.Scan(&recipe.Id, &recipe.Name, &recipe.PrepTime, &recipe.CookTime,
-		&recipe.Feeds, &recipe.Method, &recipe.Type, &recipe.Description, &recipe.Directions)
+		&recipe.Servings, &recipe.Method, &recipe.Type, &recipe.Description, &recipe.Directions)
 
 	if err != nil {
 		return nil, err
@@ -81,14 +84,14 @@ func (db *DB) CreateRecipe(recipe Recipe) (int64, error) {
 	}
 
 	var lastInsertId int64
-	res, err := db.Exec("INSERT INTO recipe (name, description, prep_time, cook_time, servings, method, type, directions) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", recipe.Name, recipe.Description, recipe.PrepTime, recipe.CookTime, recipe.Feeds, recipeMethod.Id, recipeType.Id, jsonString)
+	res, err := db.Exec("INSERT INTO recipe (name, description, prep_time, cook_time, servings, method, type, directions) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", recipe.Name, recipe.Description, recipe.PrepTime, recipe.CookTime, recipe.Servings, recipeMethod.Id, recipeType.Id, jsonString)
 	if err != nil {
 		return 0, err
 	}
 
-	lastInsertId, error := res.LastInsertId()
+	lastInsertId, insertError := res.LastInsertId()
 
-	if error != nil {
+	if insertError != nil {
 		return 0, err
 	}
 
@@ -116,7 +119,9 @@ func (db *DB) GetTypes() ([]*Type, error) {
 		return nil, err
 	}
 
-	defer rows.Close()
+	if rowErr := rows.Close(); rowErr != nil {
+		log.Println(err)
+	}
 
 	types := make([]*Type, 0)
 
@@ -143,7 +148,9 @@ func (db *DB) GetMethods() ([]*Method, error) {
 		return nil, err
 	}
 
-	defer rows.Close()
+	if rowErr := rows.Close(); rowErr != nil {
+		log.Println(err)
+	}
 
 	methods := make([]*Method, 0)
 

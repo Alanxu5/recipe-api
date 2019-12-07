@@ -15,7 +15,7 @@ type Recipe struct {
 	Ingredients types.Array     `json:"ingredients"`
 	PrepTime    int             `json:"prepTime"`
 	CookTime    int             `json:"cookTime"`
-	Feeds       int             `json:"feeds"`
+	Servings    int             `json:"servings"`
 	Type        string          `json:"type"`
 	Method      string          `json:"method"`
 }

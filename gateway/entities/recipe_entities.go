@@ -10,7 +10,7 @@ type RecipeSQL struct {
 	Directions  json.RawMessage
 	PrepTime    int
 	CookTime    int
-	Feeds       int
+	Servings    int
 	Type        int
 	Method      string
 }
