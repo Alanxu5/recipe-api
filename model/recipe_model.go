@@ -4,7 +4,6 @@ package model
 
 import (
 	"encoding/json"
-	"go/types"
 )
 
 type Recipe struct {
@@ -12,7 +11,7 @@ type Recipe struct {
 	Name        string          `json:"name"`
 	Description string          `json:"description"`
 	Directions  json.RawMessage `json:"directions"`
-	Ingredients types.Array     `json:"ingredients"`
+	Ingredients []Ingredient    `json:"ingredients"`
 	PrepTime    int             `json:"prepTime"`
 	CookTime    int             `json:"cookTime"`
 	Servings    int             `json:"servings"`
@@ -28,4 +27,11 @@ type Type struct {
 type Method struct {
 	Id   int    `json:"id"`
 	Name string `json:"name"`
+}
+
+type Ingredient struct {
+	Amount      float32 `json:"amount"`
+	Ingredient  string  `json:"ingredient"`
+	Preparation string  `json:"preparation,omitempty"`
+	Unit        string  `json:"unit,omitempty"`
 }

@@ -2,7 +2,6 @@ package model
 
 import (
 	"encoding/json"
-	"log"
 )
 
 func (db *DB) GetAllRecipes() ([]*Recipe, error) {
@@ -14,9 +13,7 @@ func (db *DB) GetAllRecipes() ([]*Recipe, error) {
 		return nil, err
 	}
 
-	if rowErr := rows.Close(); rowErr != nil {
-		log.Println(err)
-	}
+	defer rows.Close()
 
 	recipes := make([]*Recipe, 0)
 	for rows.Next() {
@@ -95,6 +92,9 @@ func (db *DB) CreateRecipe(recipe Recipe) (int64, error) {
 		return 0, err
 	}
 
+	// TODO[AX]: put food into food table and take id to put into ingredient table
+	// take last insert id and put into ingredient table.. might need sql transaction
+
 	return lastInsertId, nil
 }
 
@@ -119,9 +119,7 @@ func (db *DB) GetTypes() ([]*Type, error) {
 		return nil, err
 	}
 
-	if rowErr := rows.Close(); rowErr != nil {
-		log.Println(err)
-	}
+	defer rows.Close()
 
 	types := make([]*Type, 0)
 
@@ -148,9 +146,7 @@ func (db *DB) GetMethods() ([]*Method, error) {
 		return nil, err
 	}
 
-	if rowErr := rows.Close(); rowErr != nil {
-		log.Println(err)
-	}
+	defer rows.Close()
 
 	methods := make([]*Method, 0)
 
