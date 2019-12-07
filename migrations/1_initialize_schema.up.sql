@@ -32,7 +32,7 @@ CREATE TABLE `ingredient` (
     `id` int   NOT NULL   AUTO_INCREMENT,
     `food_id` int   NOT NULL,
     `recipe_id` int   NOT NULL,
-    `unit` varchar(25)   NOT NULL,
+    `unit` varchar(25)   NULL,
     `amount` float   NOT NULL,
     CONSTRAINT `pk_ingredient` PRIMARY KEY (
         `id`
