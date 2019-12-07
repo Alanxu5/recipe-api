@@ -15,13 +15,13 @@ CREATE TABLE `recipe` (
 
 -- bake, slow cooker, rice cooker, pan
 CREATE TABLE `method` (
-    `id` int   UNIQUE NOT NULL,
+    `id` int   UNIQUE NOT NULL  AUTO_INCREMENT,
     `name` varchar(20)   NOT NULL
 );
 
 -- protein, vegetables, carbs
 CREATE TABLE `type` (
-    `id` int   NOT NULL,
+    `id` int   NOT NULL AUTO_INCREMENT,
     `name` varchar(20)   NOT NULL,
     CONSTRAINT `pk_type` PRIMARY KEY (
         `id`
