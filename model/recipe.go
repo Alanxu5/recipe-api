@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	gateway "recipe-api/gateway/entities"
 )
 
 func (db *DB) GetAllRecipes() ([]*Recipe, error) {
@@ -33,18 +34,33 @@ func (db *DB) GetAllRecipes() ([]*Recipe, error) {
 }
 
 func (db *DB) GetRecipe(id int) (*Recipe, error) {
-	sql := `SELECT r.id, r.name, r.prep_time, r.cook_time, r.servings, m.name AS method, rt.name AS type, r.description, r.directions
+	recSql := `SELECT r.id, r.name, r.prep_time, r.cook_time, r.servings, m.name AS method, rt.name AS type, r.description, r.directions
 					FROM recipe AS r
 					JOIN method AS m 
 					ON r.method = m.id
 					JOIN type AS rt
 					ON r.type = rt.id
 					WHERE r.id = ?`
+	row := db.QueryRow(recSql, id)
 
-	row := db.QueryRow(sql, id)
+	ingSql := `SELECT * FROM ingredient WHERE recipe_id = ?`
+	rows, queryErr := db.Query(ingSql, id)
+	if queryErr != nil {
+		return nil, queryErr
+	}
+
+	var ingredients []Ingredient
+	for rows.Next() {
+		var ingredientSQL gateway.IngredientSQL
+		errScan := rows.Scan(&ingredientSQL.ID, &ingredientSQL.Ingredient, &ingredientSQL.RecipeID, &ingredientSQL.Unit, &ingredientSQL.Amount, &ingredientSQL.Preparation)
+		if errScan != nil {
+			return nil, errScan
+		}
+		ingredients = append(ingredients, Ingredient{Ingredient: ingredientSQL.Ingredient, Unit: ingredientSQL.Unit, Amount: ingredientSQL.Amount, Preparation: ingredientSQL.Preparation})
+	}
 
 	recipe := new(Recipe)
-
+	recipe.Ingredients = ingredients
 	// has to be in the same order as DB columns
 	err := row.Scan(&recipe.Id, &recipe.Name, &recipe.PrepTime, &recipe.CookTime,
 		&recipe.Servings, &recipe.Method, &recipe.Type, &recipe.Description, &recipe.Directions)
@@ -81,6 +97,12 @@ func (db *DB) CreateRecipe(recipe Recipe) (int64, error) {
 	}
 
 	var lastInsertId int64
+	tx, txErr := db.Begin()
+	if txErr != nil {
+		return 0, txErr
+	}
+	defer tx.Rollback()
+
 	res, err := db.Exec("INSERT INTO recipe (name, description, prep_time, cook_time, servings, method, type, directions) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", recipe.Name, recipe.Description, recipe.PrepTime, recipe.CookTime, recipe.Servings, recipeMethod.Id, recipeType.Id, jsonString)
 	if err != nil {
 		return 0, err
@@ -92,9 +114,15 @@ func (db *DB) CreateRecipe(recipe Recipe) (int64, error) {
 		return 0, err
 	}
 
-	// TODO[AX]: put food into food table and take id to put into ingredient table
-	// take last insert id and put into ingredient table.. might need sql transaction
+	for _, ingredient := range recipe.Ingredients {
+		if _, ingErr := db.Exec("INSERT INTO ingredient (food, recipe_id, unit, amount, preparation) VALUES (?, ?, ?, ?, ?)", ingredient.Ingredient, lastInsertId, ingredient.Unit, ingredient.Amount, ingredient.Preparation); ingErr != nil {
+			return 0, ingErr
+		}
+	}
 
+	if commErr := tx.Commit(); commErr != nil {
+		return 0, commErr
+	}
 	return lastInsertId, nil
 }
 

@@ -30,6 +30,7 @@ type Method struct {
 }
 
 type Ingredient struct {
+	ID          int     `json:"id"`
 	Amount      float32 `json:"amount"`
 	Ingredient  string  `json:"ingredient"`
 	Preparation string  `json:"preparation,omitempty"`
