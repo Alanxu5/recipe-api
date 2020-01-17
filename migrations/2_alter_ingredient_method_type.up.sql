@@ -9,4 +9,4 @@ INSERT INTO `type` (name) VALUES ('Carb');
 INSERT INTO `type` (name) VALUES ('Vegetable');
 
 ALTER TABLE `ingredient` DROP FOREIGN KEY `fk_ingredient_food_id`;
-DROP TABLE `food`;
+DROP TABLE if exists `food`;

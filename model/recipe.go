@@ -1,6 +1,7 @@
 package model
 
 import (
+	"database/sql"
 	"encoding/json"
 	gateway "recipe-api/gateway/entities"
 )
@@ -112,6 +113,34 @@ func (db *DB) CreateRecipe(recipe Recipe) (int64, error) {
 
 	if insertError != nil {
 		return 0, err
+	}
+
+	// check if equipment already exits in equipment table
+	equipSql := "SELECT id, description, equipment FROM equipment WHERE description = ? and equipment = ?"
+	insertRecipeEquipSql := "INSERT INTO recipe_equipment (recipe_id, equipment_id) VALUES (?, ?)"
+	for _, equip := range recipe.Equipment {
+		equipRow := db.QueryRow(equipSql, equip.Description, equip.Item)
+		equipModel := new(Equip)
+		equipErr := equipRow.Scan(&equipModel.ID, &equipModel.Description, &equipModel.Item)
+		if equipErr == sql.ErrNoRows {
+			insertEquipSql := "INSERT INTO equipment (description, equipment) VALUES (?, ?)"
+			res, err = db.Exec(insertEquipSql, equip.Description, equip.Item)
+			if err != nil {
+				return 0, err
+			}
+			lastEquipInsertID, insertEquipErr := res.LastInsertId()
+			if insertEquipErr != nil {
+				return 0, err
+			}
+			res, err = db.Exec(insertRecipeEquipSql, lastInsertId, lastEquipInsertID)
+			if err != nil {
+				return 0, err
+			}
+		}
+		res, err = db.Exec(insertRecipeEquipSql, lastInsertId, equipModel.ID)
+		if err != nil {
+			return 0, err
+		}
 	}
 
 	for _, ingredient := range recipe.Ingredients {

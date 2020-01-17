@@ -10,6 +10,7 @@ type Recipe struct {
 	Id          int             `json:"id"`
 	Name        string          `json:"name"`
 	Description string          `json:"description"`
+	Equipment   []Equip         `json:"equipment"`
 	Directions  json.RawMessage `json:"directions"`
 	Ingredients []Ingredient    `json:"ingredients"`
 	PrepTime    int             `json:"prepTime"`
@@ -27,6 +28,12 @@ type Type struct {
 type Method struct {
 	Id   int    `json:"id"`
 	Name string `json:"name"`
+}
+
+type Equip struct {
+	ID          int    `json:"id"`
+	Description string `json:"description"`
+	Item        string `json:"item"`
 }
 
 type Ingredient struct {
