@@ -7,7 +7,12 @@ import (
 )
 
 func (db *DB) GetAllRecipes() ([]*Recipe, error) {
-	sql := "SELECT * FROM recipe"
+	sql := `SELECT r.id, r.name, r.prep_time, r.cook_time, r.servings, m.name AS method, rt.name AS type, r.description, r.directions
+					FROM recipe AS r
+					JOIN method AS m
+					ON r.method = m.id
+					JOIN type AS rt
+					ON r.type = rt.id`
 
 	rows, err := db.Query(sql)
 
