@@ -16,7 +16,9 @@ func main() {
 		log.Panic(err)
 	}
 
-	env := &handler.Env{db}
+	env := &handler.Env{
+		DB: db,
+	}
 
 	e := echo.New()
 	e.Use(middleware.Logger())
@@ -28,7 +30,6 @@ func main() {
 	e.GET("/recipes", env.GetAllRecipes)
 	e.GET("/recipes/:id", env.GetRecipe)
 	e.POST("/recipes", env.CreateRecipe)
-	// e.DELETE("/recipes/:id", env.DeleteRecipe)
 	e.GET("/recipes/types", env.GetTypes)
 	e.GET("recipes/methods", env.GetMethods)
 
