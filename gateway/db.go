@@ -1,20 +1,20 @@
-package model
+package gateway
 
 import (
 	"database/sql"
 	"fmt"
 	"os"
+	"recipe-api/model"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 type Datastore interface {
-	GetAllRecipes() ([]*Recipe, error)
-	CreateRecipe(recipe Recipe) (int64, error)
-	DeleteRecipe(id int) (int64, error)
-	GetRecipe(id int) (*Recipe, error)
-	GetTypes() ([]*Type, error)
-	GetMethods() ([]*Method, error)
+	GetAllRecipes() ([]*model.Recipe, error)
+	GetRecipe(id int) (*model.Recipe, error)
+	CreateRecipe(recipe model.Recipe) (int64, error)
+	GetTypes() ([]*model.Type, error)
+	GetMethods() ([]*model.Method, error)
 }
 
 type DB struct {

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"recipe-api/gateway"
 	"recipe-api/model"
 	"strconv"
 
@@ -9,7 +10,7 @@ import (
 )
 
 type Env struct {
-	DB model.Datastore
+	DB gateway.Datastore
 }
 
 func (env *Env) GetAllRecipes(c echo.Context) error {
@@ -42,18 +43,6 @@ func (env *Env) CreateRecipe(c echo.Context) error {
 		return err
 	}
 	return c.JSON(http.StatusOK, id)
-}
-
-func (env *Env) DeleteRecipe(c echo.Context) error {
-	id, _ := strconv.Atoi(c.Param("id"))
-
-	// delete a recipe using our model
-	deletedId, err := env.DB.DeleteRecipe(id)
-
-	if err != nil {
-		return err
-	}
-	return c.JSON(http.StatusOK, deletedId)
 }
 
 func (env *Env) GetTypes(c echo.Context) error {

@@ -1,16 +1,15 @@
 package main
 
 import (
-	"log"
-	"recipe-api/handler"
-	"recipe-api/model"
-
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"log"
+	"recipe-api/gateway"
+	"recipe-api/handler"
 )
 
 func main() {
-	db, err := model.InitDB()
+	db, err := gateway.InitDB()
 
 	if err != nil {
 		log.Panic(err)

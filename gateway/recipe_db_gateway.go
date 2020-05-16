@@ -1,9 +1,10 @@
-package model
+package gateway
 
 import (
 	"database/sql"
 	"encoding/json"
-	gateway "recipe-api/gateway/entities"
+	"recipe-api/entities"
+	. "recipe-api/model"
 )
 
 func (db *DB) GetAllRecipes() ([]*Recipe, error) {
@@ -158,18 +159,6 @@ func (db *DB) CreateRecipe(recipe Recipe) (int64, error) {
 		return 0, commErr
 	}
 	return lastInsertId, nil
-}
-
-// TODO - implement
-func (db *DB) DeleteRecipe(id int) (int64, error) {
-	var deletedId int64
-	err := db.QueryRow("DELETE FROM recipe WHERE id = $1 RETURNING id", id).Scan(&deletedId)
-
-	if err != nil {
-		return 0, err
-	}
-
-	return deletedId, nil
 }
 
 func (db *DB) GetTypes() ([]*Type, error) {

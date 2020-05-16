@@ -1,4 +1,4 @@
-package model_test
+package gateway_test
 
 import (
 	"testing"
