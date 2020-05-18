@@ -1,27 +1,16 @@
-package gateway
+package database
 
 import (
 	"database/sql"
 	"fmt"
 	"os"
-	"recipe-api/model"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type Datastore interface {
-	GetAllRecipes() ([]*model.Recipe, error)
-	GetRecipe(id int) (*model.Recipe, error)
-	CreateRecipe(recipe model.Recipe) (int64, error)
-	GetTypes() ([]*model.Type, error)
-	GetMethods() ([]*model.Method, error)
-}
+var DB *sql.DB
 
-type DB struct {
-	*sql.DB
-}
-
-func InitDB() (*DB, error) {
+func InitDB() *sql.DB {
 	config := dbConfig()
 	var err error
 
@@ -34,17 +23,17 @@ func InitDB() (*DB, error) {
 	// sql.Open() does not establish any connection to the DB
 	db, err := sql.Open("mysql", mysqlInfo)
 	if err != nil {
-		return nil, err
+		return nil
 	}
 
 	// db.Ping() checks if the DB is available and accessible
 	err = db.Ping()
 	if err != nil {
-		return nil, err
+		return nil
 	}
 	fmt.Println("Successfully connected!")
 
-	return &DB{db}, nil
+	return db
 }
 
 func dbConfig() map[string]string {

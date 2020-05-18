@@ -1,22 +1,20 @@
 package main
 
 import (
+	"errors"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"log"
-	"recipe-api/gateway"
+	"recipe-api/database"
 	"recipe-api/handler"
 )
 
 func main() {
-	db, err := gateway.InitDB()
+	database.DB = database.InitDB()
 
-	if err != nil {
-		log.Panic(err)
-	}
-
-	env := &handler.Env{
-		DB: db,
+	if database.DB == nil {
+		log.Panic(errors.New("could not connect to the db"))
+		return
 	}
 
 	e := echo.New()
@@ -26,11 +24,11 @@ func main() {
 	// TODO: need to restrict
 	e.Use(middleware.CORS())
 
-	e.GET("/recipes", env.GetAllRecipes)
-	e.GET("/recipes/:id", env.GetRecipe)
-	e.POST("/recipes", env.CreateRecipe)
-	e.GET("/recipes/types", env.GetTypes)
-	e.GET("recipes/methods", env.GetMethods)
+	e.GET("/recipes", handler.GetAllRecipes)
+	e.GET("/recipes/:id", handler.GetRecipe)
+	e.POST("/recipes", handler.CreateRecipe)
+	e.GET("/recipes/types", handler.GetTypes)
+	e.GET("recipes/methods", handler.GetMethods)
 
 	e.Logger.Fatal(e.Start("127.0.0.1:8000"))
 }
