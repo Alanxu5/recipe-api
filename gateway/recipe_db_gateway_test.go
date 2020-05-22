@@ -3,12 +3,24 @@ package gateway_test
 import (
 	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/labstack/echo"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
+	"net/http"
+	"net/http/httptest"
 	"recipe-api/gateway"
 )
 
 var _ = Describe("Recipe", func() {
+	var c echo.Context
+
+	BeforeEach(func() {
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		rec := httptest.NewRecorder()
+		c = e.NewContext(req, rec)
+	})
+
 	It("should get types from database", func() {
 		rows := sqlmock.NewRows([]string{
 			"id",
@@ -23,12 +35,10 @@ var _ = Describe("Recipe", func() {
 		}
 		defer db.Close()
 
-		database := gateway.DB{
-			DB: db,
-		}
+		recipeDbGateway := gateway.NewRecipeDbGateway(c, db)
 
 		mock.ExpectQuery("SELECT").WillReturnRows(rows)
-		recipeTypes, getErr := database.GetTypes()
+		recipeTypes, getErr := recipeDbGateway.GetTypes()
 		if getErr != nil {
 			Fail("error getting types" + getErr.Error())
 		}
@@ -55,12 +65,10 @@ var _ = Describe("Recipe", func() {
 		}
 		defer db.Close()
 
-		database := gateway.DB{
-			DB: db,
-		}
+		recipeDbGateway := gateway.NewRecipeDbGateway(c, db)
 
 		mock.ExpectQuery("SELECT").WillReturnRows(rows)
-		recipeMethods, getErr := database.GetMethods()
+		recipeMethods, getErr := recipeDbGateway.GetMethods()
 		if getErr != nil {
 			Fail("error getting types" + getErr.Error())
 		}
@@ -94,8 +102,8 @@ var _ = Describe("Recipe", func() {
 	//	}
 	//	defer db.Close()
 	//
-	//	database := gateway.DB{
-	//		DB: db,
+	//	database := gateway.Db{
+	//		Db: db,
 	//	}
 	//
 	//	mock.ExpectQuery("SELECT").WillReturnRows(rows)

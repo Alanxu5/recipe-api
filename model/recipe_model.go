@@ -1,7 +1,5 @@
 package model
 
-// model that represents real world values
-
 import (
 	"encoding/json"
 )
@@ -31,13 +29,13 @@ type Method struct {
 }
 
 type Equip struct {
-	ID          int    `json:"id"`
+	Id          int    `json:"id"`
 	Description string `json:"description"`
 	Item        string `json:"item"`
 }
 
 type Ingredient struct {
-	ID          int     `json:"id"`
+	Id          int     `json:"id"`
 	Amount      float32 `json:"amount"`
 	Ingredient  string  `json:"ingredient"`
 	Preparation string  `json:"preparation,omitempty"`

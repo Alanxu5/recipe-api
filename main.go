@@ -10,9 +10,9 @@ import (
 )
 
 func main() {
-	database.DB = database.InitDB()
+	database.Db = database.InitDb()
 
-	if database.DB == nil {
+	if database.Db == nil {
 		log.Panic(errors.New("could not connect to the db"))
 		return
 	}

@@ -4,50 +4,50 @@ import (
 	"database/sql"
 	"encoding/json"
 	"github.com/labstack/echo"
-	"recipe-api/database"
 	"recipe-api/entity"
-	. "recipe-api/model"
+	"recipe-api/model"
 )
 
-type RecipeDBGatewayInterface interface {
-	GetAllRecipes() ([]*Recipe, error)
-	GetRecipe(id int) (*Recipe, error)
-	CreateRecipe(recipe Recipe) (int64, error)
-	GetTypes() ([]*Type, error)
-	GetMethods() ([]*Method, error)
+type RecipeDbGatewayInterface interface {
+	GetAllRecipes() ([]*gateway.Recipe, error)
+	GetRecipe(id int) (*gateway.Recipe, error)
+	CreateRecipe(recipe model.Recipe) (int64, error)
+	GetTypes() ([]*gateway.Type, error)
+	GetMethods() ([]*gateway.Method, error)
 }
 
-type RecipeDBGateway struct {
+type RecipeDbGateway struct {
 	Context echo.Context
+	Db      *sql.DB
 }
 
-func NewRecipeDBGateway(context echo.Context) RecipeDBGateway {
-	return RecipeDBGateway{
+func NewRecipeDbGateway(context echo.Context, db *sql.DB) RecipeDbGateway {
+	return RecipeDbGateway{
 		Context: context,
+		Db:      db,
 	}
 }
 
-func (rg RecipeDBGateway) GetAllRecipes() ([]*Recipe, error) {
-	sql := `SELECT r.id, r.name, r.prep_time, r.cook_time, r.servings, m.name AS method, rt.name AS type, r.description, r.directions
+func (rg RecipeDbGateway) GetAllRecipes() ([]*gateway.Recipe, error) {
+	sql := `SELECT r.Id, r.name, r.prep_time, r.cook_time, r.servings, m.name AS method, rt.name AS type, r.description, r.directions
 					FROM recipe AS r
 					JOIN method AS m
-					ON r.method = m.id
+					ON r.method = m.Id
 					JOIN type AS rt
-					ON r.type = rt.id`
+					ON r.type = rt.Id`
 
-	rows, err := database.DB.Query(sql)
-
+	rows, err := rg.Db.Query(sql)
 	if err != nil {
 		return nil, err
 	}
 
 	defer rows.Close()
 
-	recipes := make([]*Recipe, 0)
+	recipes := make([]*gateway.Recipe, 0)
 	for rows.Next() {
-		recipe := new(Recipe)
+		recipe := new(gateway.Recipe)
 
-		// has to be in the same order as DB columns
+		// has to be in the same order as Db columns
 		err := rows.Scan(&recipe.Id, &recipe.Name, &recipe.PrepTime, &recipe.CookTime,
 			&recipe.Servings, &recipe.Method, &recipe.Type, &recipe.Description, &recipe.Directions)
 
@@ -60,7 +60,7 @@ func (rg RecipeDBGateway) GetAllRecipes() ([]*Recipe, error) {
 	return recipes, nil
 }
 
-func (rg RecipeDBGateway) GetRecipe(id int) (*Recipe, error) {
+func (rg RecipeDbGateway) GetRecipe(id int) (*gateway.Recipe, error) {
 	recSql := `SELECT r.id, r.name, r.prep_time, r.cook_time, r.servings, m.name AS method, rt.name AS type, r.description, r.directions
 					FROM recipe AS r
 					JOIN method AS m 
@@ -68,30 +68,12 @@ func (rg RecipeDBGateway) GetRecipe(id int) (*Recipe, error) {
 					JOIN type AS rt
 					ON r.type = rt.id
 					WHERE r.id = ?`
-	row := database.DB.QueryRow(recSql, id)
 
-	ingSql := `SELECT * FROM ingredient WHERE recipe_id = ?`
-	rows, queryErr := database.DB.Query(ingSql, id)
-	if queryErr != nil {
-		return nil, queryErr
-	}
+	row := rg.Db.QueryRow(recSql, id)
 
-	var ingredients []Ingredient
-	for rows.Next() {
-		var ingredientSQL gateway.IngredientSQL
-		errScan := rows.Scan(&ingredientSQL.ID, &ingredientSQL.Ingredient, &ingredientSQL.RecipeID, &ingredientSQL.Unit, &ingredientSQL.Amount, &ingredientSQL.Preparation)
-		if errScan != nil {
-			return nil, errScan
-		}
-		ingredients = append(ingredients, Ingredient{Ingredient: ingredientSQL.Ingredient, Unit: ingredientSQL.Unit, Amount: ingredientSQL.Amount, Preparation: ingredientSQL.Preparation})
-	}
-
-	recipe := new(Recipe)
-	recipe.Ingredients = ingredients
-	// has to be in the same order as DB columns
+	recipe := new(gateway.Recipe)
 	err := row.Scan(&recipe.Id, &recipe.Name, &recipe.PrepTime, &recipe.CookTime,
 		&recipe.Servings, &recipe.Method, &recipe.Type, &recipe.Description, &recipe.Directions)
-
 	if err != nil {
 		return nil, err
 	}
@@ -99,15 +81,34 @@ func (rg RecipeDBGateway) GetRecipe(id int) (*Recipe, error) {
 	return recipe, nil
 }
 
-func (rg RecipeDBGateway) CreateRecipe(recipe Recipe) (int64, error) {
+func (rg RecipeDbGateway) GetIngredients(id int) (*[]gateway.Ingredient, error) {
+	var ingredients []gateway.Ingredient
+	ingSql := `SELECT * FROM ingredient WHERE recipe_id = ?`
+	rows, err := rg.Db.Query(ingSql, id)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var ingredient gateway.Ingredient
+		err = rows.Scan(&ingredient.Id, &ingredient.Ingredient, &ingredient.RecipeId, &ingredient.Unit, &ingredient.Amount, &ingredient.Preparation)
+		if err != nil {
+			return nil, err
+		}
+		ingredients = append(ingredients, ingredient)
+	}
+
+	return &ingredients, nil
+}
+
+func (rg RecipeDbGateway) CreateRecipe(recipe model.Recipe) (int64, error) {
 	jsonString, err := json.Marshal(recipe.Directions)
 	if err != nil {
 		return 0, err
 	}
 
 	methodSql := "SELECT * FROM method WHERE name = ?"
-	row := database.DB.QueryRow(methodSql, recipe.Method)
-	recipeMethod := new(Method)
+	row := rg.Db.QueryRow(methodSql, recipe.Method)
+	recipeMethod := new(model.Method)
 	errMethod := row.Scan(&recipeMethod.Id, &recipeMethod.Name)
 
 	if errMethod != nil {
@@ -115,8 +116,8 @@ func (rg RecipeDBGateway) CreateRecipe(recipe Recipe) (int64, error) {
 	}
 
 	typeSql := "SELECT * FROM type WHERE name = ?"
-	typeRow := database.DB.QueryRow(typeSql, recipe.Type)
-	recipeType := new(Type)
+	typeRow := rg.Db.QueryRow(typeSql, recipe.Type)
+	recipeType := new(model.Type)
 	errType := typeRow.Scan(&recipeType.Id, &recipeType.Name)
 
 	if errType != nil {
@@ -124,13 +125,13 @@ func (rg RecipeDBGateway) CreateRecipe(recipe Recipe) (int64, error) {
 	}
 
 	var lastInsertId int64
-	tx, txErr := database.DB.Begin()
+	tx, txErr := rg.Db.Begin()
 	if txErr != nil {
 		return 0, txErr
 	}
 	defer tx.Rollback()
 
-	res, err := database.DB.Exec("INSERT INTO recipe (name, description, prep_time, cook_time, servings, method, type, directions) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", recipe.Name, recipe.Description, recipe.PrepTime, recipe.CookTime, recipe.Servings, recipeMethod.Id, recipeType.Id, jsonString)
+	res, err := rg.Db.Exec("INSERT INTO recipe (name, description, prep_time, cook_time, servings, method, type, directions) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", recipe.Name, recipe.Description, recipe.PrepTime, recipe.CookTime, recipe.Servings, recipeMethod.Id, recipeType.Id, jsonString)
 	if err != nil {
 		return 0, err
 	}
@@ -145,12 +146,12 @@ func (rg RecipeDBGateway) CreateRecipe(recipe Recipe) (int64, error) {
 	equipSql := "SELECT id, description, equipment FROM equipment WHERE description = ? and equipment = ?"
 	insertRecipeEquipSql := "INSERT INTO recipe_equipment (recipe_id, equipment_id) VALUES (?, ?)"
 	for _, equip := range recipe.Equipment {
-		equipRow := database.DB.QueryRow(equipSql, equip.Description, equip.Item)
-		equipModel := new(Equip)
-		equipErr := equipRow.Scan(&equipModel.ID, &equipModel.Description, &equipModel.Item)
+		equipRow := rg.Db.QueryRow(equipSql, equip.Description, equip.Item)
+		equipModel := new(model.Equip)
+		equipErr := equipRow.Scan(&equipModel.Id, &equipModel.Description, &equipModel.Item)
 		if equipErr == sql.ErrNoRows {
 			insertEquipSql := "INSERT INTO equipment (description, equipment) VALUES (?, ?)"
-			res, err = database.DB.Exec(insertEquipSql, equip.Description, equip.Item)
+			res, err = rg.Db.Exec(insertEquipSql, equip.Description, equip.Item)
 			if err != nil {
 				return 0, err
 			}
@@ -158,19 +159,19 @@ func (rg RecipeDBGateway) CreateRecipe(recipe Recipe) (int64, error) {
 			if insertEquipErr != nil {
 				return 0, err
 			}
-			res, err = database.DB.Exec(insertRecipeEquipSql, lastInsertId, lastEquipInsertID)
+			res, err = rg.Db.Exec(insertRecipeEquipSql, lastInsertId, lastEquipInsertID)
 			if err != nil {
 				return 0, err
 			}
 		}
-		res, err = database.DB.Exec(insertRecipeEquipSql, lastInsertId, equipModel.ID)
+		res, err = rg.Db.Exec(insertRecipeEquipSql, lastInsertId, equipModel.Id)
 		if err != nil {
 			return 0, err
 		}
 	}
 
 	for _, ingredient := range recipe.Ingredients {
-		if _, ingErr := database.DB.Exec("INSERT INTO ingredient (food, recipe_id, unit, amount, preparation) VALUES (?, ?, ?, ?, ?)", ingredient.Ingredient, lastInsertId, ingredient.Unit, ingredient.Amount, ingredient.Preparation); ingErr != nil {
+		if _, ingErr := rg.Db.Exec("INSERT INTO ingredient (food, recipe_id, unit, amount, preparation) VALUES (?, ?, ?, ?, ?)", ingredient.Ingredient, lastInsertId, ingredient.Unit, ingredient.Amount, ingredient.Preparation); ingErr != nil {
 			return 0, ingErr
 		}
 	}
@@ -181,54 +182,52 @@ func (rg RecipeDBGateway) CreateRecipe(recipe Recipe) (int64, error) {
 	return lastInsertId, nil
 }
 
-func (rg RecipeDBGateway) GetTypes() ([]*Type, error) {
+func (rg RecipeDbGateway) GetTypes() ([]*gateway.Type, error) {
 	sql := "SELECT * FROM type"
 
-	rows, err := database.DB.Query(sql)
-
+	rows, err := rg.Db.Query(sql)
 	if err != nil {
 		return nil, err
 	}
 
 	defer rows.Close()
 
-	types := make([]*Type, 0)
+	types := make([]*gateway.Type, 0)
 
 	for rows.Next() {
-		recipeType := new(Type)
+		recipeType := new(gateway.Type)
 
 		err := rows.Scan(&recipeType.Id, &recipeType.Name)
-
 		if err != nil {
 			return nil, err
 		}
+
 		types = append(types, recipeType)
 	}
 
 	return types, nil
 }
 
-func (rg RecipeDBGateway) GetMethods() ([]*Method, error) {
+func (rg RecipeDbGateway) GetMethods() ([]*gateway.Method, error) {
 	sql := "SELECT * FROM method"
 
-	rows, err := database.DB.Query(sql)
-
+	rows, err := rg.Db.Query(sql)
 	if err != nil {
 		return nil, err
 	}
 
 	defer rows.Close()
 
-	methods := make([]*Method, 0)
+	methods := make([]*gateway.Method, 0)
 
 	for rows.Next() {
-		recipeMethod := new(Method)
+		recipeMethod := new(gateway.Method)
 
 		err := rows.Scan(&recipeMethod.Id, &recipeMethod.Name)
-
 		if err != nil {
 			return nil, err
 		}
+
 		methods = append(methods, recipeMethod)
 	}
 

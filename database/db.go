@@ -8,25 +8,25 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-var DB *sql.DB
+var Db *sql.DB
 
-func InitDB() *sql.DB {
+func InitDb() *sql.DB {
 	config := dbConfig()
 	var err error
 
-	// all the information needed to connect to DB
+	// all the information needed to connect to Db
 	mysqlInfo := fmt.Sprintf("%s:%s@/%s",
 		config["DBUSER"], config["DBPASS"], config["DBNAME"])
 
 	println(mysqlInfo)
 
-	// sql.Open() does not establish any connection to the DB
+	// sql.Open() does not establish any connection to the Db
 	db, err := sql.Open("mysql", mysqlInfo)
 	if err != nil {
 		return nil
 	}
 
-	// db.Ping() checks if the DB is available and accessible
+	// db.Ping() checks if the Db is available and accessible
 	err = db.Ping()
 	if err != nil {
 		return nil

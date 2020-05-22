@@ -1,25 +1,36 @@
 package gateway
 
-// database models
+import (
+	"encoding/json"
+)
 
-import "encoding/json"
-
-type RecipeSQL struct {
+type Recipe struct {
+	Id          int
 	Name        string
-	Description string
-	Directions  json.RawMessage
 	PrepTime    int
 	CookTime    int
 	Servings    int
-	Type        int
 	Method      string
+	Type        string
+	Description string
+	Directions  json.RawMessage
 }
 
-type IngredientSQL struct {
-	ID          int
+type Ingredient struct {
+	Id          int
 	Amount      float32
-	RecipeID    int
+	RecipeId    int
 	Ingredient  string
 	Preparation string
 	Unit        string
+}
+
+type Type struct {
+	Id   int
+	Name string
+}
+
+type Method struct {
+	Id   int
+	Name string
 }
