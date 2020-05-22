@@ -2,9 +2,18 @@ package adapter
 
 import (
 	"github.com/labstack/echo"
+	"recipe-api/adapter/converter"
 	"recipe-api/gateway"
 	"recipe-api/model"
 )
+
+type RecipeAdapterInterface interface {
+	GetAllRecipes() ([]model.Recipe, error)
+	GetRecipe(id int) (*model.Recipe, error)
+	CreateRecipe(recipe model.Recipe) (int64, error)
+	GetTypes() ([]model.Type, error)
+	GetMethods() ([]model.Method, error)
+}
 
 type RecipeAdapter struct {
 	recipeDbGateway gateway.RecipeDbGatewayInterface
@@ -18,13 +27,13 @@ func NewRecipeAdapter(recipeDbGateway gateway.RecipeDbGatewayInterface, c echo.C
 	}
 }
 
-func (ra RecipeAdapter) GetAllRecipes() ([]*model.Recipe, error) {
+func (ra RecipeAdapter) GetAllRecipes() ([]model.Recipe, error) {
 	recipesSQL, err := ra.recipeDbGateway.GetAllRecipes()
 	if err != nil {
 		return nil, err
 	}
 
-	recipes := make([]*model.Recipe, 0)
+	recipes := make([]model.Recipe, 0)
 	for _, rec := range recipesSQL {
 		recipe := model.Recipe{
 			Id:          rec.Id,
@@ -39,7 +48,7 @@ func (ra RecipeAdapter) GetAllRecipes() ([]*model.Recipe, error) {
 			Type:        rec.Type,
 			Method:      rec.Method,
 		}
-		recipes = append(recipes, &recipe)
+		recipes = append(recipes, recipe)
 	}
 
 	return recipes, nil
@@ -51,19 +60,14 @@ func (ra RecipeAdapter) GetRecipe(id int) (*model.Recipe, error) {
 		return nil, err
 	}
 
-	// should create a function and grab the undefined values
-	rec := model.Recipe{
-		Id:          recipe.Id,
-		Name:        recipe.Name,
-		Description: recipe.Description,
-		Equipment:   nil,
-		Directions:  recipe.Directions,
-		Ingredients: nil,
-		PrepTime:    recipe.PrepTime,
-		CookTime:    recipe.CookTime,
-		Servings:    recipe.Servings,
-		Type:        "",
-		Method:      "",
+	ingredients, ingErr := ra.recipeDbGateway.GetIngredients(id)
+	if ingErr != nil {
+		return nil, err
+	}
+
+	rec, convertErr := converter.ConvertRecipe(recipe, ingredients)
+	if convertErr != nil {
+		return nil, err
 	}
 
 	return &rec, nil
@@ -78,39 +82,29 @@ func (ra RecipeAdapter) CreateRecipe(recipe model.Recipe) (int64, error) {
 	return recipeId, nil
 }
 
-func (ra RecipeAdapter) GetTypes() ([]*model.Type, error) {
+func (ra RecipeAdapter) GetTypes() ([]model.Type, error) {
 	types, err := ra.recipeDbGateway.GetTypes()
 	if err != nil {
 		return nil, err
 	}
 
-	var recipeTypes []*model.Type
-	for _, t := range types {
-		recipeType := model.Type{
-			Id:   t.Id,
-			Name: t.Name,
-		}
-
-		recipeTypes = append(recipeTypes, &recipeType)
+	recipeTypes, convertErr := converter.ConvertTypes(types)
+	if convertErr != nil {
+		return nil, convertErr
 	}
 
 	return recipeTypes, nil
 }
 
-func (ra RecipeAdapter) GetMethods() ([]*model.Method, error) {
+func (ra RecipeAdapter) GetMethods() ([]model.Method, error) {
 	methods, err := ra.recipeDbGateway.GetMethods()
 	if err != nil {
 		return nil, err
 	}
 
-	var recipeMethods []*model.Method
-	for _, m := range methods {
-		recipeMethod := model.Method{
-			Id:   m.Id,
-			Name: m.Name,
-		}
-
-		recipeMethods = append(recipeMethods, &recipeMethod)
+	recipeMethods, convertErr := converter.ConvertMethods(methods)
+	if convertErr != nil {
+		return nil, convertErr
 	}
 
 	return recipeMethods, nil
