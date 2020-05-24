@@ -5,24 +5,26 @@ import (
 	"recipe-api/model"
 )
 
-func ConvertRecipe(recipe *gateway.Recipe, ingredients []gateway.Ingredient) (model.Recipe, error) {
+func ConvertRecipe(recipe *gateway.Recipe, ingredients []gateway.Ingredient, equipment []gateway.Equipment) (model.Recipe, error) {
 	ing, err := ConvertIngredients(ingredients)
 	if err != nil {
 		return model.Recipe{}, err
 	}
 
+	equip, err := ConvertEquipment(equipment)
+
 	rec := model.Recipe{
 		Id:          recipe.Id,
 		Name:        recipe.Name,
 		Description: recipe.Description,
-		Equipment:   nil,
+		Equipment:   equip,
 		Directions:  recipe.Directions,
 		Ingredients: ing,
 		PrepTime:    recipe.PrepTime,
 		CookTime:    recipe.CookTime,
 		Servings:    recipe.Servings,
-		Type:        "",
-		Method:      "",
+		Type:        recipe.Type,
+		Method:      recipe.Method,
 	}
 
 	return rec, nil
@@ -42,6 +44,21 @@ func ConvertIngredients(ingredients []gateway.Ingredient) ([]model.Ingredient, e
 	}
 
 	return recipeIngredients, nil
+}
+
+func ConvertEquipment(equipment []gateway.Equipment) ([]model.Equipment, error) {
+	var recipeEquipment []model.Equipment
+	for _, ing := range equipment {
+		recipeEquip := model.Equipment{
+			Id:          ing.EquipmentId,
+			RecipeId:    ing.RecipeId,
+			Description: ing.Description,
+			Equipment:   ing.Equipment,
+		}
+		recipeEquipment = append(recipeEquipment, recipeEquip)
+	}
+
+	return recipeEquipment, nil
 }
 
 func ConvertTypes(types []gateway.Type) ([]model.Type, error) {

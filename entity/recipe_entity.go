@@ -25,6 +25,13 @@ type Ingredient struct {
 	Unit        string
 }
 
+type Equipment struct {
+	EquipmentId int
+	RecipeId    int
+	Description string
+	Equipment   string
+}
+
 type Type struct {
 	Id   int
 	Name string

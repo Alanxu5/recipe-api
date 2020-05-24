@@ -65,7 +65,12 @@ func (ra RecipeAdapter) GetRecipe(id int) (*model.Recipe, error) {
 		return nil, err
 	}
 
-	rec, convertErr := converter.ConvertRecipe(recipe, ingredients)
+	equipment, equipErr := ra.recipeDbGateway.GetEquipment(id)
+	if equipErr != nil {
+		return nil, equipErr
+	}
+
+	rec, convertErr := converter.ConvertRecipe(recipe, ingredients, equipment)
 	if convertErr != nil {
 		return nil, err
 	}

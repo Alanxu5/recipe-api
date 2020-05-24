@@ -12,6 +12,7 @@ type RecipeDbGatewayInterface interface {
 	GetAllRecipes() ([]gateway.Recipe, error)
 	GetRecipe(id int) (*gateway.Recipe, error)
 	GetIngredients(id int) ([]gateway.Ingredient, error)
+	GetEquipment(id int) ([]gateway.Equipment, error)
 	CreateRecipe(recipe model.Recipe) (int64, error)
 	GetTypes() ([]gateway.Type, error)
 	GetMethods() ([]gateway.Method, error)
@@ -30,12 +31,12 @@ func NewRecipeDbGateway(context echo.Context, db *sql.DB) RecipeDbGateway {
 }
 
 func (rg RecipeDbGateway) GetAllRecipes() ([]gateway.Recipe, error) {
-	query := `SELECT r.Id, r.name, r.prep_time, r.cook_time, r.servings, m.name AS method, rt.name AS type, r.description, r.directions
+	query := `SELECT r.Id, r.name, r.prep_time, r.cook_time, r.servings, m.name AS method, t.name AS type, r.description, r.directions
 					FROM recipe AS r
 					JOIN method AS m
 					ON r.method = m.Id
-					JOIN type AS rt
-					ON r.type = rt.Id`
+					JOIN type AS t
+					ON r.type = t.Id`
 
 	rows, err := rg.Db.Query(query)
 	if err != nil {
@@ -63,12 +64,12 @@ func (rg RecipeDbGateway) GetAllRecipes() ([]gateway.Recipe, error) {
 }
 
 func (rg RecipeDbGateway) GetRecipe(id int) (*gateway.Recipe, error) {
-	query := `SELECT r.id, r.name, r.prep_time, r.cook_time, r.servings, m.name AS method, rt.name AS type, r.description, r.directions
+	query := `SELECT r.id, r.name, r.prep_time, r.cook_time, r.servings, m.name AS method, t.name AS type, r.description, r.directions
 					FROM recipe AS r
 					JOIN method AS m 
 					ON r.method = m.id
-					JOIN type AS rt
-					ON r.type = rt.id
+					JOIN type AS t
+					ON r.type = t.id
 					WHERE r.id = ?`
 
 	row := rg.Db.QueryRow(query, id)
@@ -102,6 +103,33 @@ func (rg RecipeDbGateway) GetIngredients(id int) ([]gateway.Ingredient, error) {
 	}
 
 	return ingredients, nil
+}
+
+func (rg RecipeDbGateway) GetEquipment(id int) ([]gateway.Equipment, error) {
+	var equipment []gateway.Equipment
+	query := `SELECT e.id, re.recipe_id, e.description, e.equipment
+			  FROM equipment as e 
+			  INNER JOIN recipe_equipment as re 
+			  ON e.id = re.equipment_id
+			  INNER JOIN recipe as r
+			  ON r.id = re.recipe_id
+			  WHERE recipe_id = ?`
+	rows, err := rg.Db.Query(query, id)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		equip := gateway.Equipment{}
+		err := rows.Scan(&equip.EquipmentId, &equip.RecipeId, &equip.Description, &equip.Equipment)
+		if err != nil {
+			return nil, err
+		}
+
+		equipment = append(equipment, equip)
+	}
+
+	return equipment, nil
 }
 
 func (rg RecipeDbGateway) CreateRecipe(recipe model.Recipe) (int64, error) {
@@ -150,12 +178,13 @@ func (rg RecipeDbGateway) CreateRecipe(recipe model.Recipe) (int64, error) {
 	equipQuery := "SELECT id, description, equipment FROM equipment WHERE description = ? and equipment = ?"
 	insertRecipeEquipQuery := "INSERT INTO recipe_equipment (recipe_id, equipment_id) VALUES (?, ?)"
 	for _, equip := range recipe.Equipment {
-		equipRow := rg.Db.QueryRow(equipQuery, equip.Description, equip.Item)
-		equipModel := new(model.Equip)
-		equipErr := equipRow.Scan(&equipModel.Id, &equipModel.Description, &equipModel.Item)
+		// need to fix this stuff because put in quick fix for error from changing model
+		equipRow := rg.Db.QueryRow(equipQuery, equip.Description, equip.Equipment)
+		equipModel := new(model.Equipment)
+		equipErr := equipRow.Scan(&equipModel.Id, &equipModel.Description, &equipModel.Equipment)
 		if equipErr == sql.ErrNoRows {
 			insertEquipQuery := "INSERT INTO equipment (description, equipment) VALUES (?, ?)"
-			res, err = rg.Db.Exec(insertEquipQuery, equip.Description, equip.Item)
+			res, err = rg.Db.Exec(insertEquipQuery, equip.Description, equip.Equipment)
 			if err != nil {
 				return 0, err
 			}
