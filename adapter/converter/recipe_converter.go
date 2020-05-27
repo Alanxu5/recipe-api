@@ -1,6 +1,7 @@
 package converter
 
 import (
+	"errors"
 	gateway "recipe-api/entity"
 	"recipe-api/model"
 )
@@ -50,8 +51,7 @@ func ConvertEquipment(equipment []gateway.Equipment) ([]model.Equipment, error) 
 	var recipeEquipment []model.Equipment
 	for _, ing := range equipment {
 		recipeEquip := model.Equipment{
-			Id:          ing.EquipmentId,
-			RecipeId:    ing.RecipeId,
+			Id:          ing.Id,
 			Description: ing.Description,
 			Equipment:   ing.Equipment,
 		}
@@ -85,4 +85,71 @@ func ConvertMethods(methods []gateway.Method) ([]model.Method, error) {
 	}
 
 	return recipeMethods, nil
+}
+
+func ConvertRecipeToEntity(recipe model.Recipe) gateway.Recipe {
+	rec := gateway.Recipe{
+		Id:          recipe.Id,
+		Name:        recipe.Name,
+		PrepTime:    recipe.PrepTime,
+		CookTime:    recipe.CookTime,
+		Servings:    recipe.Servings,
+		Method:      recipe.Method,
+		Type:        recipe.Type,
+		Description: recipe.Description,
+		Directions:  recipe.Directions,
+	}
+
+	return rec
+}
+
+func ConvertEquipToEntity(equipment []model.Equipment) []gateway.Equipment {
+	var equipList []gateway.Equipment
+	for _, e := range equipment {
+		equip := gateway.Equipment{
+			Id:          e.Id,
+			Description: e.Description,
+			Equipment:   e.Equipment,
+		}
+		equipList = append(equipList, equip)
+	}
+
+	return equipList
+}
+
+func ConvertIngredientsToEntity(ingredients []model.Ingredient) []gateway.Ingredient {
+	var ingredientList []gateway.Ingredient
+	for _, i := range ingredients {
+		ingredient := gateway.Ingredient{
+			Id:          i.Id,
+			Ingredient:  i.Ingredient,
+			RecipeId:    0,
+			Unit:        i.Unit,
+			Amount:      i.Amount,
+			Preparation: i.Preparation,
+		}
+		ingredientList = append(ingredientList, ingredient)
+	}
+
+	return ingredientList
+}
+
+func ConvertTypeStringToId(recType string, types []gateway.Type) (int, error) {
+	for t := range types {
+		if types[t].Name == recType {
+			return types[t].Id, nil
+		}
+	}
+
+	return 0, errors.New("recipe type could not be converted to id")
+}
+
+func ConvertMethodStringToId(recMethod string, methods []gateway.Method) (int, error) {
+	for m := range methods {
+		if methods[m].Name == recMethod {
+			return methods[m].Id, nil
+		}
+	}
+
+	return 0, errors.New("recipe method could not be converted to id")
 }

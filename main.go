@@ -2,8 +2,8 @@ package main
 
 import (
 	"errors"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"log"
 	"recipe-api/database"
 	"recipe-api/handler"

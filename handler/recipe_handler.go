@@ -9,7 +9,7 @@ import (
 	"recipe-api/model"
 	"strconv"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 func createRecipeAdapter(c echo.Context, db *sql.DB) adapter.RecipeAdapter {

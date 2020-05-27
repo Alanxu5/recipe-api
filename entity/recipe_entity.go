@@ -18,16 +18,15 @@ type Recipe struct {
 
 type Ingredient struct {
 	Id          int
-	Amount      float32
-	RecipeId    int
 	Ingredient  string
-	Preparation string
+	RecipeId    int
 	Unit        string
+	Amount      float32
+	Preparation string
 }
 
 type Equipment struct {
-	EquipmentId int
-	RecipeId    int
+	Id          int
 	Description string
 	Equipment   string
 }

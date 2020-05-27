@@ -1,7 +1,7 @@
 package adapter
 
 import (
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"recipe-api/adapter/converter"
 	"recipe-api/gateway"
 	"recipe-api/model"
@@ -79,9 +79,33 @@ func (ra RecipeAdapter) GetRecipe(id int) (*model.Recipe, error) {
 }
 
 func (ra RecipeAdapter) CreateRecipe(recipe model.Recipe) (int64, error) {
-	recipeId, err := ra.recipeDbGateway.CreateRecipe(recipe)
-	if err != nil {
-		return 0, err
+	recipeEntity := converter.ConvertRecipeToEntity(recipe)
+	equipEntity := converter.ConvertEquipToEntity(recipe.Equipment)
+	ingredientEntity := converter.ConvertIngredientsToEntity(recipe.Ingredients)
+
+	typeEntities, typesErr := ra.recipeDbGateway.GetTypes()
+	if typesErr != nil {
+		return 0, typesErr
+	}
+
+	methodEntities, methodsErr := ra.recipeDbGateway.GetMethods()
+	if methodsErr != nil {
+		return 0, methodsErr
+	}
+
+	typeId, typeErr := converter.ConvertTypeStringToId(recipe.Type, typeEntities)
+	if typeErr != nil {
+		return 0, typeErr
+	}
+
+	methodId, methodErr := converter.ConvertMethodStringToId(recipe.Method, methodEntities)
+	if methodErr != nil {
+		return 0, methodErr
+	}
+
+	recipeId, createErr := ra.recipeDbGateway.CreateRecipe(recipeEntity, equipEntity, ingredientEntity, typeId, methodId)
+	if createErr != nil {
+		return 0, createErr
 	}
 
 	return recipeId, nil

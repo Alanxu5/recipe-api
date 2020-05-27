@@ -3,9 +3,8 @@ package gateway
 import (
 	"database/sql"
 	"encoding/json"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"recipe-api/entity"
-	"recipe-api/model"
 )
 
 type RecipeDbGatewayInterface interface {
@@ -13,7 +12,7 @@ type RecipeDbGatewayInterface interface {
 	GetRecipe(id int) (*gateway.Recipe, error)
 	GetIngredients(id int) ([]gateway.Ingredient, error)
 	GetEquipment(id int) ([]gateway.Equipment, error)
-	CreateRecipe(recipe model.Recipe) (int64, error)
+	CreateRecipe(recipe gateway.Recipe, equipment []gateway.Equipment, ingredients []gateway.Ingredient, typeId int, methodId int) (int64, error)
 	GetTypes() ([]gateway.Type, error)
 	GetMethods() ([]gateway.Method, error)
 }
@@ -49,10 +48,8 @@ func (rg RecipeDbGateway) GetAllRecipes() ([]gateway.Recipe, error) {
 	for rows.Next() {
 		recipe := gateway.Recipe{}
 
-		// has to be in the same order as Db columns
 		err := rows.Scan(&recipe.Id, &recipe.Name, &recipe.PrepTime, &recipe.CookTime,
 			&recipe.Servings, &recipe.Method, &recipe.Type, &recipe.Description, &recipe.Directions)
-
 		if err != nil {
 			return nil, err
 		}
@@ -107,7 +104,7 @@ func (rg RecipeDbGateway) GetIngredients(id int) ([]gateway.Ingredient, error) {
 
 func (rg RecipeDbGateway) GetEquipment(id int) ([]gateway.Equipment, error) {
 	var equipment []gateway.Equipment
-	query := `SELECT e.id, re.recipe_id, e.description, e.equipment
+	query := `SELECT e.id, e.description, e.equipment
 			  FROM equipment as e 
 			  INNER JOIN recipe_equipment as re 
 			  ON e.id = re.equipment_id
@@ -121,7 +118,7 @@ func (rg RecipeDbGateway) GetEquipment(id int) ([]gateway.Equipment, error) {
 
 	for rows.Next() {
 		equip := gateway.Equipment{}
-		err := rows.Scan(&equip.EquipmentId, &equip.RecipeId, &equip.Description, &equip.Equipment)
+		err := rows.Scan(&equip.Id, &equip.Description, &equip.Equipment)
 		if err != nil {
 			return nil, err
 		}
@@ -132,30 +129,7 @@ func (rg RecipeDbGateway) GetEquipment(id int) ([]gateway.Equipment, error) {
 	return equipment, nil
 }
 
-func (rg RecipeDbGateway) CreateRecipe(recipe model.Recipe) (int64, error) {
-	jsonString, err := json.Marshal(recipe.Directions)
-	if err != nil {
-		return 0, err
-	}
-
-	methodQuery := "SELECT * FROM method WHERE name = ?"
-	row := rg.Db.QueryRow(methodQuery, recipe.Method)
-	recipeMethod := new(model.Method)
-	errMethod := row.Scan(&recipeMethod.Id, &recipeMethod.Name)
-
-	if errMethod != nil {
-		return 0, errMethod
-	}
-
-	typeQuery := "SELECT * FROM type WHERE name = ?"
-	typeRow := rg.Db.QueryRow(typeQuery, recipe.Type)
-	recipeType := new(model.Type)
-	errType := typeRow.Scan(&recipeType.Id, &recipeType.Name)
-
-	if errType != nil {
-		return 0, errType
-	}
-
+func (rg RecipeDbGateway) CreateRecipe(recipe gateway.Recipe, equipment []gateway.Equipment, ingredients []gateway.Ingredient, typeId int, methodId int) (int64, error) {
 	var lastInsertId int64
 	tx, txErr := rg.Db.Begin()
 	if txErr != nil {
@@ -163,13 +137,17 @@ func (rg RecipeDbGateway) CreateRecipe(recipe model.Recipe) (int64, error) {
 	}
 	defer tx.Rollback()
 
-	res, err := rg.Db.Exec("INSERT INTO recipe (name, description, prep_time, cook_time, servings, method, type, directions) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", recipe.Name, recipe.Description, recipe.PrepTime, recipe.CookTime, recipe.Servings, recipeMethod.Id, recipeType.Id, jsonString)
+	directionsJson, err := json.Marshal(recipe.Directions)
+	if err != nil {
+		return 0, err
+	}
+
+	res, err := rg.Db.Exec("INSERT INTO recipe (name, description, prep_time, cook_time, servings, method, type, directions) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", recipe.Name, recipe.Description, recipe.PrepTime, recipe.CookTime, recipe.Servings, methodId, typeId, directionsJson)
 	if err != nil {
 		return 0, err
 	}
 
 	lastInsertId, insertError := res.LastInsertId()
-
 	if insertError != nil {
 		return 0, err
 	}
@@ -177,33 +155,36 @@ func (rg RecipeDbGateway) CreateRecipe(recipe model.Recipe) (int64, error) {
 	// check if equipment already exits in equipment table
 	equipQuery := "SELECT id, description, equipment FROM equipment WHERE description = ? and equipment = ?"
 	insertRecipeEquipQuery := "INSERT INTO recipe_equipment (recipe_id, equipment_id) VALUES (?, ?)"
-	for _, equip := range recipe.Equipment {
-		// need to fix this stuff because put in quick fix for error from changing model
+	for _, equip := range equipment {
 		equipRow := rg.Db.QueryRow(equipQuery, equip.Description, equip.Equipment)
-		equipModel := new(model.Equipment)
-		equipErr := equipRow.Scan(&equipModel.Id, &equipModel.Description, &equipModel.Equipment)
+		equipEntity := new(gateway.Equipment)
+		equipErr := equipRow.Scan(&equipEntity.Id, &equipEntity.Description, &equipEntity.Equipment)
+		// no row matches
 		if equipErr == sql.ErrNoRows {
 			insertEquipQuery := "INSERT INTO equipment (description, equipment) VALUES (?, ?)"
 			res, err = rg.Db.Exec(insertEquipQuery, equip.Description, equip.Equipment)
 			if err != nil {
 				return 0, err
 			}
+
 			lastEquipInsertID, insertEquipErr := res.LastInsertId()
 			if insertEquipErr != nil {
 				return 0, err
 			}
+
 			res, err = rg.Db.Exec(insertRecipeEquipQuery, lastInsertId, lastEquipInsertID)
 			if err != nil {
 				return 0, err
 			}
-		}
-		res, err = rg.Db.Exec(insertRecipeEquipQuery, lastInsertId, equipModel.Id)
-		if err != nil {
-			return 0, err
+		} else {
+			res, err = rg.Db.Exec(insertRecipeEquipQuery, lastInsertId, equipEntity.Id)
+			if err != nil {
+				return 0, err
+			}
 		}
 	}
 
-	for _, ingredient := range recipe.Ingredients {
+	for _, ingredient := range ingredients {
 		if _, ingErr := rg.Db.Exec("INSERT INTO ingredient (food, recipe_id, unit, amount, preparation) VALUES (?, ?, ?, ?, ?)", ingredient.Ingredient, lastInsertId, ingredient.Unit, ingredient.Amount, ingredient.Preparation); ingErr != nil {
 			return 0, ingErr
 		}

@@ -7,9 +7,9 @@ import (
 type Recipe struct {
 	Id          int             `json:"id"`
 	Name        string          `json:"name"`
-	Description string          `json:"description"`
-	Equipment   []Equipment     `json:"equipment"`
-	Directions  json.RawMessage `json:"directions"`
+	Description string          `json:"description,omitempty"`
+	Equipment   []Equipment     `json:"equipment,omitempty"`
+	Directions  json.RawMessage `json:"directions,omitempty"`
 	Ingredients []Ingredient    `json:"ingredients"`
 	PrepTime    int             `json:"prepTime"`
 	CookTime    int             `json:"cookTime"`
@@ -30,7 +30,6 @@ type Method struct {
 
 type Equipment struct {
 	Id          int    `json:"id"`
-	RecipeId    int    `json:"recipeId"`
 	Description string `json:"description"`
 	Equipment   string `json:"equipment"`
 }

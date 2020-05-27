@@ -3,8 +3,7 @@ CREATE TABLE equipment (
   `description` VARCHAR(45) NULL,
   `equipment` VARCHAR(45) NOT NULL,
   `affiliate_link` VARCHAR(250) NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `equipment_UNIQUE` (`equipment` ASC) VISIBLE
+  PRIMARY KEY (`id`)
 );
 
 CREATE TABLE recipe_equipment (
