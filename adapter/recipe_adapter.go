@@ -28,30 +28,27 @@ func NewRecipeAdapter(recipeDbGateway gateway.RecipeDbGatewayInterface, c echo.C
 }
 
 func (ra RecipeAdapter) GetAllRecipes() ([]model.Recipe, error) {
-	recipesSQL, err := ra.recipeDbGateway.GetAllRecipes()
+	recipes, err := ra.recipeDbGateway.GetAllRecipes()
 	if err != nil {
 		return nil, err
 	}
 
-	recipes := make([]model.Recipe, 0)
-	for _, rec := range recipesSQL {
-		recipe := model.Recipe{
-			Id:          rec.Id,
-			Name:        rec.Name,
-			Description: rec.Description,
-			Equipment:   nil,
-			Directions:  rec.Directions,
-			Ingredients: nil,
-			PrepTime:    rec.PrepTime,
-			CookTime:    rec.CookTime,
-			Servings:    rec.Servings,
-			Type:        rec.Type,
-			Method:      rec.Method,
+	var recs []model.Recipe
+	for _, rec := range recipes {
+		ingredients, ingErr := ra.recipeDbGateway.GetIngredients(rec.Id)
+		if ingErr != nil {
+			return nil, ingErr
 		}
-		recipes = append(recipes, recipe)
+
+		convertedRec, convertErr := converter.ConvertRecipe(&rec, ingredients, nil)
+		if convertErr != nil {
+			return nil, convertErr
+		}
+
+		recs = append(recs, convertedRec)
 	}
 
-	return recipes, nil
+	return recs, nil
 }
 
 func (ra RecipeAdapter) GetRecipe(id int) (*model.Recipe, error) {
