@@ -2,6 +2,7 @@ module recipe-api
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.4.1
+	github.com/auth0/go-jwt-middleware v0.0.0-20200507191422-d30d7b9ece63 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/labstack/echo/v4 v4.1.16
