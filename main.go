@@ -44,7 +44,6 @@ func main() {
 
 	// TODO: need to restrict
 	e.Use(middleware.CORS())
-
 	r := e.Group("/api")
 
 	jwtMiddleware := jwtmiddleware.New(jwtmiddleware.Options{
@@ -72,12 +71,15 @@ func main() {
 		SigningMethod: jwt.SigningMethodRS256,
 	})
 
-	r.Use(echo.WrapMiddleware(jwtMiddleware.Handler))
+	// no auth needed
 	r.GET("/recipes", handler.GetAllRecipes)
 	r.GET("/recipes/:id", handler.GetRecipe)
 	r.POST("/recipes", handler.CreateRecipe)
 	r.GET("/recipes/types", handler.GetTypes)
-	r.GET("recipes/methods", handler.GetMethods)
+	r.GET("/recipes/methods", handler.GetMethods)
+
+	r.Use(echo.WrapMiddleware(jwtMiddleware.Handler))
+	// auth needed
 
 	e.Logger.Fatal(e.Start("127.0.0.1:8000"))
 }
