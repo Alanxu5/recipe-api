@@ -81,7 +81,8 @@ func main() {
 	r.Use(echo.WrapMiddleware(jwtMiddleware.Handler))
 	// auth needed
 
-	e.Logger.Fatal(e.Start("127.0.0.1:8000"))
+	// port, _ := os.LookupEnv("PORT")
+	e.Logger.Fatal(e.Start("0.0.0.0:10000"))
 }
 
 func getPemCert(token *jwt.Token) (string, error) {
