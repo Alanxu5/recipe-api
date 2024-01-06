@@ -9,6 +9,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"log"
 	"net/http"
+	"os"
 	"recipe-api/database"
 	"recipe-api/handler"
 )
@@ -81,8 +82,11 @@ func main() {
 	r.Use(echo.WrapMiddleware(jwtMiddleware.Handler))
 	// auth needed
 
-	// port, _ := os.LookupEnv("PORT")
-	e.Logger.Fatal(e.Start("0.0.0.0:10000"))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	e.Logger.Fatal(e.Start(":" + port))
 }
 
 func getPemCert(token *jwt.Token) (string, error) {
